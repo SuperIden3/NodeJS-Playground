@@ -1,0 +1,28 @@
+{
+  "setupTasks": [
+    {
+      "name": "Install Dependencies",
+      "command": "yarn install"
+    }
+  ],
+  "tasks": {
+    "start": {
+      "name": "start",
+      "command": "clear\nyarn start",
+      "runAtStart": true
+    },
+    "build": {
+      "name": "build",
+      "command": "clear\nyarn build",
+      "runAtStart": false
+    },
+    "nodemon": {
+      "name": "nodemon",
+      "command": "clear\nnodemon index.js"
+    },
+    "test": {
+      "name": "test",
+      "command": "clear\nnode index.js"
+    }
+  }
+}
