@@ -84,7 +84,7 @@ class LineReader {
     input = process.stdin,
     output = process.stdout,
     completer,
-    terminal = false
+    terminal = false,
   ) {
     const o = this;
     const readline = require("readline");
@@ -200,7 +200,7 @@ class Person {
         invalid_type_error: "Must be a number for an age.",
         required_error: "The age is required for the person.",
         description: "This is the age for the person.",
-      })
+      }),
     );
   hobbies = z
     .array(z.string(), {
@@ -220,7 +220,7 @@ class Person {
       throw new Error(
         `The person cannot be${age === -1 ? " a" : ""} ${age} year${
           age === -1 ? "" : "s"
-        } old.`
+        } old.`,
       );
     this.name = this.name.parse(name);
     this.age = this.age.parse(age);
@@ -360,7 +360,7 @@ function Union(...types) {
           types[0].startsWith("u")
             ? "n"
             : ""
-        } ${listFormatter.format(types)}, but recieved ${typeof value}`
+        } ${listFormatter.format(types)}, but recieved ${typeof value}`,
       );
     },
   };
@@ -375,7 +375,7 @@ function Trace(message) {
       return traceMessage;
     },
     enumerable: true,
-    writable: false
+    writable: false,
   });
   return traceMessage;
 }
@@ -384,29 +384,107 @@ const cet = function createEventTarget(options = {}) {
   if (typeof options === "object" && !Array.isArray(options))
     Object.assign(et, options);
   else if (Array.isArray(options))
-    throw new TypeError(
-      "options for function must be an object, not an array"
-    );
+    throw new TypeError("options for function must be an object, not an array");
   else if (typeof options !== "object")
     throw new TypeError(
       `options for function must be an object, not type of ${
         Array.isArray(options) ? "array" : typeof options
-      }`
+      }`,
     );
   return et;
 };
+/**
+ * Calculate the perimeter of a rectangle.
+ * @param {...number} nums The length and width of the rectangle.
+ * @returns {number} The perimeter of the rectangle.
+ */
 function perimeter(...nums) {
   const arr = [];
-  for(const i in nums)
-    arr[i] = nums[i] * 2;
-  const sum = arr.reduce((p,c) => p + c);
+  for (const i in nums) arr[i] = nums[i] * 2;
+  const sum = arr.reduce((p, c) => p + c);
   return sum;
 }
 
+/**
+ * Inspired by Python, this method of the `String` class allows you to format strings.
+ * @param {...any} args The values to replace the indexes.
+ * @returns {string} The formatted string.
+ * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
+ */
+String.prototype.format = function format(...args) {
+  // `this` is the original string
+  /**
+   * Finds the string `"{(number)}""`.
+   *
+   * In `{}`, `\d` is a digit from `0` to `9`. The `+` means one or more. `?` means optional. The flag `g` means global.
+   * @type {RegExp}
+   */
+  const regexp = /{(\d+)}?/g;
+
+  return this.replace(
+    regexp,
+    /**
+     * @param {string} match The matched string.
+     * @param {number} number The index of the matched string.
+     * @returns {string} The replaced string.
+     */
+    (match = "", number = -1) => {
+      if (typeof args[number] !== "undefined") {
+        // Checks if the index exists.
+        return args[number];
+      } else {
+        return match;
+      }
+    },
+  );
+};
+/**
+ * Messager is an `EventTarget` that allows you to send and receive messages.
+ * @param {string} str The message to send.
+ * @returns {string} The message that was sent.
+ * @throws {TypeError} If `str` is not a string.
+ */
+const Messager = Object.freeze(
+  cet({
+    message(str) {
+      if (typeof str !== "string") {
+        console.error(
+          Messager.dispatchEvent(
+            new CustomEvent("error", {
+              message: "str is not a string",
+              error: new TypeError("str is not a string"),
+            }),
+          ),
+        );
+        return new TypeError("str is not a string");
+      } else {
+        Messager.dispatchEvent(
+          new MessageEvent("message", { data: String(str) }),
+        );
+        return String(str);
+      }
+    },
+  }),
+);
+/**
+ * Format an array using `Intl.ListFormat`.
+ * @param {("conjunction" | "disjunction" | "unit")} type The type of grouping.
+ * @param {("long" | "short" | "narrow")} style The style of the grouping.
+ * @returns {string} The formatted array.
+ */
+Array.prototype.format = function format(
+  language = "en-US",
+  type = "conjunction",
+  style = "long",
+) {
+  const listFormatter = new Intl.ListFormat(language, {
+    style,
+    type,
+  });
+  return listFormatter.format(this);
+};
+
 //------------------------------------------------------------------------------------------------------------------//
-
-
-(
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
@@ -414,22 +492,25 @@ function perimeter(...nums) {
  * @param {Arguments} args The arguments for the function.
  * @returns {IIAFE}
  */
-async function main(...args) {
+(async function main() {
+  "use strict";
+  const main = {
+    arguments: process.argv.slice(2),
+    file: process.argv[1],
+    interpreter: process.argv[0],
+    ...process.argv,
+  };
   try {
-    const Messager = Object.freeze(cet({
-      message(str) {
-        if(typeof str !== "string") {
-          Messager.dispatchEvent(new CustomEvent("error", {message: ("str is not a string"), error: new TypeError("str is not a string")}));
-          return new TypeError("str is not a string");
-        } else {
-          Messager.dispatchEvent(new MessageEvent("message", {data: str}));
-          return new String(str);
-        }
-      }
-    }));
-    
+    console.log(main);
+    console.log(
+      "Interpreter: {0}\nFile: {1}\nArguments: {2}".format(
+        main.interpreter,
+        main.file,
+        main.arguments,
+      ),
+    );
+    console.log(Intl);
   } catch (e) {
     console.error(e);
   }
-}
-)();
+})();
