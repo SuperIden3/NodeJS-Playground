@@ -1,16 +1,23 @@
+console.time("Code");
+//------------------------------------------------------------//
+
 // Imports here.
 const pickRandom = require("./pickRandom.js");
 const range = require("./range.js");
 
-const fs = require("fs");
-const http = require("http"); // Port: 3421
-const yargs = require("yargs")(process.argv);
-const stream = require("stream");
-const url = require("url");
-const z = require("zod");
-const translate = require("translate");
+const FS = require("fs");
+const HTTP = require("http"); // Port: 3421
+const YARGS = require("yargs")(process.argv);
+const STREAM = require("stream");
+const _URL = require("url");
+const ZOD = require("zod");
+const TRANSLATE = require("translate");
+/*const rl = require("readline").createInterface({
+  input: process.stdin,
+  output: process.stdout,
+});*/
 
-//------------------------------------------------------------------------------------------------------------------//
+//------------------------------------------------------------//
 // Custom functions or pre-defined variables here.
 
 /**
@@ -408,11 +415,11 @@ function perimeter(...nums) {
 /**
  * Inspired by Python, this method of the `String` class allows you to format strings.
  * @param {...any} args The values to replace the indexes.
- * @returns {string} The formatted string.
+ * @typedef {string} FormattedString
+ * @returns {FormattedString} The formatted string.
  * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
  */
 String.prototype.format = function format(...args) {
-  // `this` is the original string
   /**
    * Finds the string `"{(number)}""`.
    *
@@ -420,7 +427,6 @@ String.prototype.format = function format(...args) {
    * @type {RegExp}
    */
   const regexp = /{(\d+)}?/g;
-
   return this.replace(
     regexp,
     /**
@@ -428,14 +434,7 @@ String.prototype.format = function format(...args) {
      * @param {number} number The index of the matched string.
      * @returns {string} The replaced string.
      */
-    (match = "", number = -1) => {
-      if (typeof args[number] !== "undefined") {
-        // Checks if the index exists.
-        return args[number];
-      } else {
-        return match;
-      }
-    },
+    (match, number) => (!!args[number] ? args[number] : match),
   );
 };
 /**
@@ -483,8 +482,19 @@ Array.prototype.format = function format(
   });
   return listFormatter.format(this);
 };
+/**
+ * Translates from one language to another.
+ * @param {string} from The language to translate **from**.
+ * @param {string} to The language to translate **to**.
+ * @returns {(str: string) => string} The translation function.
+ */
+function translate(from, to) {
+  TRANSLATE.from = from;
+  TRANSLATE.to = to;
+  return (str) => TRANSLATE(str);
+}
+//----------------------------------------------------------//
 
-//------------------------------------------------------------------------------------------------------------------//
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
@@ -501,16 +511,24 @@ Array.prototype.format = function format(
     ...process.argv,
   };
   try {
-    console.log(main);
+    console.dir(main);
     console.log(
-      "Interpreter: {0}\nFile: {1}\nArguments: {2}".format(
-        main.interpreter,
-        main.file,
-        main.arguments,
-      ),
+      await translate(
+        !!main.arguments[0] ? "en" : main.arguments[0],
+        !!main.arguments[1] ? "es" : main.arguments[1],
+      )(!!main.arguments[2] ? main.arguments[2] : "Hello, World!"),
     );
-    console.log(Intl);
-  } catch (e) {
+  } catch (
+    /**
+     * The error that occurred.
+     * @type {(Error)}
+     */
+    e
+  ) {
+    console.error("Type: ", e.name);
     console.error(e);
+  } finally {
+    console.timeEnd("Code");
+    process.exit();
   }
 })();

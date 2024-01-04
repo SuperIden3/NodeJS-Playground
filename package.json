@@ -23,7 +23,6 @@
   "homepage": "https://github.com/codesandbox-app/static-template#readme",
   "dependencies": {
     "node": "^19.3.0",
-    "nodemon": "^2.0.20",
     "translate": "^1.4.1",
     "zod": "^3.20.2"
   },
