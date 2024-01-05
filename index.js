@@ -6,16 +6,17 @@ const pickRandom = require("./pickRandom.js");
 const range = require("./range.js");
 
 const FS = require("fs");
+const BUFFER = require("buffer") || require("node:buffer");
 const HTTP = require("http"); // Port: 3421
 const YARGS = require("yargs")(process.argv);
 const STREAM = require("stream");
 const _URL = require("url");
 const ZOD = require("zod");
 const TRANSLATE = require("translate");
-/*const rl = require("readline").createInterface({
+const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
-});*/
+});
 
 //------------------------------------------------------------//
 // Custom functions or pre-defined variables here.
@@ -151,13 +152,25 @@ class URL {
 }
 /**
  * Reads, iterates, and yields over all the values of a ReadableStream (`readableStream`).
+ * @async
+ * @template T - The type of the values to read.
+ * @type {<T>(readableStream: ReadableStream<T>) => AsyncGenerator<T, void, void>}
  * @param {ReadableStream} readableStream The `ReadableStream` to read.
- * @yields {any} The iterated value of `readableStream`.
- * @returns {any[]} All the iterated values of `readableStream` in an array.
+ * @yields {T} The iterated value of `readableStream`.
+ * @returns {T[]} All the iterated values of `readableStream` in an array.
  */
 const rsra = async function* readableStreamReadAll(readableStream) {
+  /**
+   * @type {ReadableStreamDefaultReader<T>}
+   */
   const reader = readableStream.getReader();
-  let readValue = z.any().parse(await reader.read());
+  /**
+   * @type {ReadableStreamDefaultReadResult<T>}
+   */
+  let readValue = await reader.read();
+  /**
+   * @type {Array<T>}
+   */
   const readValues = [];
   while (readValue.done === false) {
     yield readValue.value;
@@ -414,45 +427,41 @@ function perimeter(...nums) {
 
 /**
  * Inspired by Python, this method of the `String` class allows you to format strings.
- * @param {...any} args The values to replace the indexes.
+ * @typedef {(string[]|object)} FormatStringArguments
+ * @param {FormatStringArguments} args The values to replace the indexes.
  * @typedef {string} FormattedString
  * @returns {FormattedString} The formatted string.
  * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
  */
-String.prototype.format = function format(...args) {
-  /**
-   * Finds the string `"{(number)}""`.
-   *
-   * In `{}`, `\d` is a digit from `0` to `9`. The `+` means one or more. `?` means optional. The flag `g` means global.
-   * @type {RegExp}
-   */
-  const regexp = /{(\d+)}?/g;
-  return this.replace(
-    regexp,
-    /**
-     * @param {string} match The matched string.
-     * @param {number} number The index of the matched string.
-     * @returns {string} The replaced string.
-     */
-    (match, number) => (!!args[number] ? args[number] : match),
-  );
+String.prototype.format = function format(args) {
+  if (Array.isArray(args)) {
+    const regex = /{(\d+)}/g;
+    return this.replace(regex, (_, i) => args[i]);
+  }
 };
 /**
  * Messager is an `EventTarget` that allows you to send and receive messages.
- * @param {string} str The message to send.
- * @returns {string} The message that was sent.
- * @throws {TypeError} If `str` is not a string.
+ * @template {string} Message The actual message.
+ * @type {{message: (str: string) => string}}
  */
 const Messager = Object.freeze(
   cet({
+    /**
+     * Send a message.
+     * @param {Message} str The message to send.
+     * @returns {Message} The message that was sent.
+     * @throws {TypeError} If `str` is not a string.
+     */
     message(str) {
       if (typeof str !== "string") {
         console.error(
-          Messager.dispatchEvent(
-            new CustomEvent("error", {
-              message: "str is not a string",
-              error: new TypeError("str is not a string"),
-            }),
+          new TypeError(
+            Messager.dispatchEvent(
+              new CustomEvent("error", {
+                message: "str is not a string",
+                error: new TypeError("str is not a string"),
+              }),
+            ),
           ),
         );
         return new TypeError("str is not a string");
@@ -493,8 +502,15 @@ function translate(from, to) {
   TRANSLATE.to = to;
   return (str) => TRANSLATE(str);
 }
+function toFile(data, info, name = "") {
+  const file =
+    name !== "" && typeof name === "string"
+      ? new BUFFER.File(Buffer.from(data), name, info)
+      : new BUFFER.Blob(Buffer.from(data), info);
+  return file;
+}
+const { EventEmitter } = STREAM;
 //----------------------------------------------------------//
-
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
@@ -504,31 +520,66 @@ function translate(from, to) {
  */
 (async function main() {
   "use strict";
+  Messager.addEventListener("message", (e) => {
+    console.log("Event:", e);
+    console.log("Data:", e.data);
+  });
+  Object.assign(globalThis, {
+    n: "n",
+    y: "y",
+  });
   const main = {
     arguments: process.argv.slice(2),
     file: process.argv[1],
     interpreter: process.argv[0],
     ...process.argv,
   };
+  Object.defineProperties(process, {
+    arguments: {
+      value: main.arguments,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    },
+    file: {
+      value: main.file,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    },
+    interpreter: {
+      value: main.interpreter,
+      writable: false,
+      enumerable: false,
+      configurable: false,
+    },
+  });
   try {
-    console.dir(main);
     console.log(
-      await translate(
-        !!main.arguments[0] ? "en" : main.arguments[0],
-        !!main.arguments[1] ? "es" : main.arguments[1],
-      )(!!main.arguments[2] ? main.arguments[2] : "Hello, World!"),
+      "\r\nIt is",
+      await new Promise(async (r, f) => {
+        r(!!main.arguments.valueOf()[0]);
+      }),
+      "that there are arguments given.\r\n",
+    );
+    Messager.message(
+      "Hello, {0}!".format([
+        pickRandom(...["John", "Jane", "Joe", "Jill", "Jim", "Jack"]),
+      ]),
     );
   } catch (
     /**
      * The error that occurred.
-     * @type {(Error)}
+     * @type {(Error|Object)}
+     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+     * @extends {Error}
      */
     e
   ) {
-    console.error("Type: ", e.name);
     console.error(e);
+    process.kill(process.pid, "SIGINT");
   } finally {
+    rl.close();
     console.timeEnd("Code");
-    process.exit();
   }
 })();
