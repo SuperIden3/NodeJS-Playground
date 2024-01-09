@@ -3,6 +3,10 @@
     {
       "name": "Install Dependencies",
       "command": "yarn install"
+    },
+    {
+      "name": "Done",
+      "command": "echo All done!"
     }
   ],
   "tasks": {
