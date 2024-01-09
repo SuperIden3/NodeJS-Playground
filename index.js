@@ -437,6 +437,9 @@ String.prototype.format = function format(args) {
   if (Array.isArray(args)) {
     const regex = /{(\d+)}/g;
     return this.replace(regex, (_, i) => args[i]);
+  } else {
+    const regex = /{([^}]+)}/g;
+    return this.replace(regex, (_, i) => args[i]);
   }
 };
 /**
@@ -520,14 +523,6 @@ const { EventEmitter } = STREAM;
  */
 (async function main() {
   "use strict";
-  Messager.addEventListener("message", (e) => {
-    console.log("Event:", e);
-    console.log("Data:", e.data);
-  });
-  Object.assign(globalThis, {
-    n: "n",
-    y: "y",
-  });
   const main = {
     arguments: process.argv.slice(2),
     file: process.argv[1],
@@ -555,6 +550,10 @@ const { EventEmitter } = STREAM;
     },
   });
   try {
+    Messager.addEventListener("message", (e) => {
+      console.log("Event:", e);
+      console.log("Data:", e.data);
+    });
     console.log(
       "\r\nIt is",
       await new Promise(async (r, f) => {
@@ -563,12 +562,20 @@ const { EventEmitter } = STREAM;
       "that there are arguments given.\r\n",
     );
     Messager.message(
-      "Hello, {0}!".format([
-        pickRandom(...["John", "Jane", "Joe", "Jill", "Jim", "Jack"]),
-      ]),
+      "Hello, {name}!\r\nHow are you doing, {name}?".format({
+        name: pickRandom(
+          ...["John", "Jane", "Joe", "Jill", "Jim", "Jack", "Jenny"],
+        ),
+      }),
+    );
+    Messager.message(
+      "One: {one}\nTwo: {two}".format({
+        one: 1,
+        two: 2,
+      }),
     );
   } catch (
-    /** 
+    /**
      * The error that occurred.
      * @type {(Error|Object)}
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
