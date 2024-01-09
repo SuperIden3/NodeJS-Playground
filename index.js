@@ -568,7 +568,7 @@ const { EventEmitter } = STREAM;
       ]),
     );
   } catch (
-    /**
+    /** 
      * The error that occurred.
      * @type {(Error|Object)}
      * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
