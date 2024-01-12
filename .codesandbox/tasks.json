@@ -3,13 +3,13 @@
     {
       "name": "Install Dependencies",
       "command": "yarn install"
-    },
-    {
-      "name": "Done",
-      "command": "echo All done!"
     }
   ],
   "tasks": {
+    "update": {
+      "name": "update",
+      "command": "yarn run update"
+    },
     "start": {
       "name": "start",
       "command": "clear\nyarn start",
@@ -22,11 +22,19 @@
     },
     "nodemon": {
       "name": "nodemon",
-      "command": "clear\nnodemon index.js"
+      "command": "reset\nnodemon index.js"
     },
     "test": {
       "name": "test",
       "command": "clear\nnode index.js"
+    },
+    "install": {
+      "name": "install",
+      "command": "yarn run apkg"
+    },
+    "uninstall": {
+      "name": "uninstall",
+      "command": "yarn run rmpkg"
     }
   }
 }

@@ -13,10 +13,10 @@ const STREAM = require("stream");
 const _URL = require("url");
 const ZOD = require("zod");
 const TRANSLATE = require("translate");
-const rl = require("readline").createInterface({
+/*const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
-});
+});*/
 
 //------------------------------------------------------------//
 // Custom functions or pre-defined variables here.
@@ -127,6 +127,14 @@ class LineReader {
     });
   }
 }
+/**
+ * Initialize a new URL object.
+ * @param {string} _url The URL.
+ * @returns {URL}
+ * @example const url = new URL("https://example.com");
+ * console.log(url); // URL { url: 'https://example.com' }
+ * url.open().then(console.log).catch(console.error); // Opens the URL in a new tab.
+ */
 class URL {
   /**
    * Initialize a new URL object.
@@ -203,6 +211,15 @@ function min(...values) {
   for (const num of values) if (z.number().parse(num) < minimum) minimum = num;
   return minimum;
 }
+/**
+ * Makes a new Person.
+ * @param {string} name The name for the person.
+ * @param {number} age The age for the person.
+ * @param {string[]} hobbies The hobbies for the person.
+ * @returns {Person} The `Person`.
+ * @example const person = new Person("John", 25, ["hiking", "reading"]);
+ * console.log(person); // Person { name: "John", age: 25, hobbies: ["hiking", "reading"] }
+ */
 class Person {
   name = z.string({
     invalid_type_error: "Must be a string for a name.",
@@ -229,12 +246,6 @@ class Person {
       description: "These are the hobbies for the person.",
     })
     .or(z.object(new Set()));
-  /**
-   * Makes a new Person.
-   * @param {string} name The name for the person.
-   * @param {number} age The age for the person.
-   * @param {string[]} hobbies The hobbies for the person.
-   */
   constructor(name, age, hobbies) {
     if (age <= 0)
       throw new Error(
@@ -269,6 +280,11 @@ function YouSuckError(message) {
   });
   return error;
 }
+/**
+ * Execute a shell command.
+ * @param {string} command The shell command to execute.
+ * @returns {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
+ */
 const esc = async function executeShellCommand(command) {
   const cp = require("child_process");
   return new Promise((r, f) => {
@@ -385,6 +401,16 @@ function Union(...types) {
     },
   };
 }
+/**
+ * Create a trace message.
+ * @param {string} message The message.
+ * @returns {Error} The trace message.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+ * ```js
+ * const trace = Trace("this is a trace message");
+ * console.log(trace);
+ * ```
+ */
 function Trace(message) {
   const traceMessage = Error(message);
   traceMessage.name = "Trace";
@@ -399,6 +425,12 @@ function Trace(message) {
   });
   return traceMessage;
 }
+/**
+ * Create an event target.
+ * @param {object} options The options.
+ * @returns {EventTarget} The event target.
+ * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget
+ */
 const cet = function createEventTarget(options = {}) {
   const et = new EventTarget();
   if (typeof options === "object" && !Array.isArray(options))
@@ -433,7 +465,7 @@ function perimeter(...nums) {
  * @returns {FormattedString} The formatted string.
  * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
  */
-String.prototype.format = function format(args) {
+const format = function format(args) {
   if (Array.isArray(args)) {
     const regex = /{(\d+)}/g;
     return this.replace(regex, (_, i) => args[i]);
@@ -442,6 +474,7 @@ String.prototype.format = function format(args) {
     return this.replace(regex, (_, i) => args[i]);
   }
 };
+String.prototype.format = format;
 /**
  * Messager is an `EventTarget` that allows you to send and receive messages.
  * @template {string} Message The actual message.
@@ -513,21 +546,95 @@ function toFile(data, info, name = "") {
   return file;
 }
 const { EventEmitter } = STREAM;
+/**
+ * Prettify JSON.
+ * @param {?((this: any, key: string, value: any) => any)} replacer The replacer, which is a function that can be used to transform the result.
+ * @this {object}
+ * @param {?number} spacing The spacing, which is the tab size in spaces.
+ * @returns {string} The prettified JSON.
+ */
+const prettify = function prettify(replacer = null, spacing = 2) {
+  return JSON.stringify(this, replacer, spacing);
+};
+Object.prototype.prettify = prettify;
+/**
+ * *Mappify* or *Settify* an object.
+ * Turns `obj` and everything inside of it into a `Map` or `Set`.
+ * @returns {Map | Set} The mappified/settified object.
+ */
+function mappify() {
+  if (Array.isArray(this)) {
+    // turn `obj` into a Set, and if there are other arrays in `obj`, turn them into Sets. If there are objects in `obj`, turn them into Maps.
+    return new Set(
+      this.flatMap((value) => {
+        if (Array.isArray(value)) {
+          return new Set(value);
+        } else if (typeof value === "object") {
+          return new Map(Object.entries(value));
+        } else {
+          return value;
+        }
+      }),
+    );
+  } else {
+    return new Map(
+      Object.entries(this).map(([key, value]) => [
+        key,
+        typeof value === "object" && !Array.isArray(value) && !!value
+          ? new Map(Object.entries(value))
+          : Array.isArray(value)
+            ? new Set(value)
+            : value,
+      ]),
+    );
+  }
+}
+Object.prototype.mappify = mappify;
+/**
+ * *Unmappify* or *Unsettify* an object.
+ * Turns `obj` and everything inside of it from a `Map` or `Set` back into an `object` or an `array`.
+ * @this {Map | Set}
+ * @returns {object | any[]} The unmappified/unsettified object.
+ */
+function unmappify() {
+  for (const [key, value] of this) {
+    if (value instanceof Map) {
+      this.set(key, Object.fromEntries(value));
+    } else if (value instanceof Set) {
+      this.set(key, Array.from(value));
+    } else {
+      this.set(key, value);
+    }
+  }
+  return Object.fromEntries(this);
+}
+Map.prototype.unmappify = unmappify;
+Set.prototype.unmappify = unmappify;
+const dn = function doNothing() {
+  return this;
+};
 //----------------------------------------------------------//
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
- * @typedef {Promise<any> | void} IIAFE A return type for Immediately Invoked Async Function Expressions.
+ * @typedef {Promise<any>} IIAFE A return type for Immediately Invoked Async Function Expressions.
  * @param {Arguments} args The arguments for the function.
  * @returns {IIAFE}
  */
 (async function main() {
   "use strict";
   const main = {
-    arguments: process.argv.slice(2),
+    arguments: {
+      argv: process.argv.slice(2),
+      length: process.argv.length,
+      // from ./input.txt
+      "input.txt": await FS.promises.readFile("./input.txt", "utf8", (err, data) => {
+        if (err) throw err;
+        return data.toString().trim().split("\n");
+      }),
+    },
     file: process.argv[1],
     interpreter: process.argv[0],
-    ...process.argv,
   };
   Object.defineProperties(process, {
     arguments: {
@@ -550,30 +657,7 @@ const { EventEmitter } = STREAM;
     },
   });
   try {
-    Messager.addEventListener("message", (e) => {
-      console.log("Event:", e);
-      console.log("Data:", e.data);
-    });
-    console.log(
-      "\r\nIt is",
-      await new Promise(async (r, f) => {
-        r(!!main.arguments.valueOf()[0]);
-      }),
-      "that there are arguments given.\r\n",
-    );
-    Messager.message(
-      "Hello, {name}!\r\nHow are you doing, {name}?".format({
-        name: pickRandom(
-          ...["John", "Jane", "Joe", "Jill", "Jim", "Jack", "Jenny"],
-        ),
-      }),
-    );
-    Messager.message(
-      "One: {one}\nTwo: {two}".format({
-        one: 1,
-        two: 2,
-      }),
-    );
+    console.log(mappify(main));
   } catch (
     /**
      * The error that occurred.
@@ -586,7 +670,6 @@ const { EventEmitter } = STREAM;
     console.error(e);
     process.kill(process.pid, "SIGINT");
   } finally {
-    rl.close();
     console.timeEnd("Code");
   }
 })();

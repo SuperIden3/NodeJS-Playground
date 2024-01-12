@@ -5,19 +5,17 @@
  * @param {number} step The number to increment or decrement by.
  */
 function range(start, end, step = 1) {
-    try {
-        let arr = [];
-        if(start < end) {
-            for(let i = start; i <= end; i += step)
-                arr.push(i);
-        } else {
-            for(let j = start; j >= end; i -= step)
-                arr.push(j);
-        }
-        return arr;
-    } catch(e) {
-        throw(e);
+  try {
+    let arr = [];
+    if (start < end) {
+      for (let i = start; i <= end; i += step) arr.push(i);
+    } else {
+      for (let j = start; j >= end; j -= step) arr.push(j);
     }
+    return arr;
+  } catch (e) {
+    throw e;
+  }
 }
 
 module.exports = range;
