@@ -10,7 +10,7 @@
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
     "build": "tsc && webpack --config webpack.config.js",
     "update": "yarn install | less && sudo apt-get update | less && npm i | less",
-    "apkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn install $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt-get install $package; else npm i $package; fi && echo Done!",
+    "apkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn add $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt-get install $package; else npm i $package; fi && echo Done!",
     "rmpkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn remove $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt remove $package; else npm uninstall $package; fi && echo Done!"
   },
   "contributors": [
@@ -30,6 +30,7 @@
   "dependencies": {
     "blessed": "^0.1.81",
     "buffer": "^6.0.3",
+    "dotenv": "^16.3.1",
     "node": "^19.8.1",
     "translate": "^1.4.1",
     "webpack": "^5.89.0",

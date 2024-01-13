@@ -5,7 +5,9 @@ console.time("Code");
 const pickRandom = require("./pickRandom.js");
 const range = require("./range.js");
 
+const UTIL = require("util");
 const FS = require("fs");
+const OS = require("os");
 const BUFFER = require("buffer") || require("node:buffer");
 const HTTP = require("http"); // Port: 3421
 const YARGS = require("yargs")(process.argv);
@@ -17,6 +19,7 @@ const TRANSLATE = require("translate");
   input: process.stdin,
   output: process.stdout,
 });*/
+require("dotenv").config();
 
 //------------------------------------------------------------//
 // Custom functions or pre-defined variables here.
@@ -561,6 +564,21 @@ Object.prototype.prettify = prettify;
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
  * @returns {Map | Set} The mappified/settified object.
+ * @version 1.0.0
+ * @example
+ * ```js
+ * const obj = {
+ *   a: 1,
+ *   b: 2,
+ *   c: {
+ *     d: 3,
+ *     e: 4,
+ *
+ *   },
+ *   f: [5, 6],
+ * };
+ * console.log(obj.mappify()); // Map (4) { 'a' => 1, 'b' => 2, 'c' => Map (2) { 'd' => 3, 'e' => 4 }, 'f' => Set(2) { 5, 6 } }
+ * ```
  */
 function mappify() {
   if (Array.isArray(this)) {
@@ -595,6 +613,20 @@ Object.prototype.mappify = mappify;
  * Turns `obj` and everything inside of it from a `Map` or `Set` back into an `object` or an `array`.
  * @this {Map | Set}
  * @returns {object | any[]} The unmappified/unsettified object.
+ * @version 1.0.0
+ * @example
+ * ```js
+ * const obj = new Map([
+ *   ['a', 1],
+ *   ['b', 2],
+ *   ['c', new Map([
+ *     ['d', 3],
+ *     ['e', 4],
+ * ])],
+ *   ['f', new Set([5, 6])],
+ * ]);
+ * console.log(obj.unmappify()); // { a: 1, b: 2, c: { d: 3, e: 4 }, f: [5, 6] }
+ * ```
  */
 function unmappify() {
   for (const [key, value] of this) {
@@ -613,6 +645,75 @@ Set.prototype.unmappify = unmappify;
 const dn = function doNothing() {
   return this;
 };
+/**
+ * The object that contains methods for encrypting and decrypting data with different algorithms.
+ * @type {{pig: (str: string, shift?: number) => string, ab: (str: string) => string, cs: (str: string, shift?: number) => string, rf: (str: string, shift?: number) => string}} The object that contains methods for encrypting and decrypting data with different algorithms.
+ * @method pig Pigpens a string.
+ * @method ab Atbash cipher.
+ * @method cs Caesar cipher.
+ * @method  rf Rail Fence cipher.
+ * @version 1.0.0
+ */
+const cipher = {
+  pig: function pigpen(str, shift = 1) {
+    return str
+      .split("")
+      .map((char) => String.fromCharCode(char.charCodeAt(0) + shift))
+      .join("")
+      .trim()
+      .valueOf();
+  },
+  ab: function atbash(str) {
+    const alphabet = "abcdefghijklmnopqrstuvwxyz".valueOf();
+    return str
+      .toLowerCase()
+      .split("")
+      .map((char) => {
+        const index =
+          alphabet.indexOf(char) === undefined ? -1 : alphabet.indexOf(char);
+        if (index === -1) return char;
+        return alphabet[alphabet.length - index - 1];
+      })
+      .join("")
+      .trim()
+      .valueOf();
+  },
+  cs: function caesar(str, shift = 1) {
+    // Unlike pigpen, caesar does not use symbols.
+    return str
+      .split("")
+      .map((char) => {
+        const code = char.charCodeAt(0);
+        if (code >= 65 && code <= 90) {
+          return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+        } else if (code >= 97 && code <= 122) {
+          return String.fromCharCode(((code - 97 + shift) % 26) + 97);
+        } else {
+          return char;
+        }
+      })
+      .join("")
+      .trim()
+      .valueOf();
+  },
+  rf: function railfence(str, shift = 1) {
+    return str
+      .split("")
+      .map((char, index) => {
+        const code = char.charCodeAt(0);
+        if (code >= 65 && code <= 90) {
+          return String.fromCharCode(((code - 65 + shift) % 26) + 65);
+        } else if (code >= 97 && code <= 122) {
+          return String.fromCharCode(((code - 97 + shift) % 26) + 97);
+        } else {
+          return char;
+        }
+      })
+      .join("")
+      .trim()
+      .valueOf();
+  },
+};
 //----------------------------------------------------------//
 /**
  * Main function for code.
@@ -623,19 +724,51 @@ const dn = function doNothing() {
  */
 (async function main() {
   "use strict";
+  /**
+   * The object that contrains the main info for the program.
+   * @typedef {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string}} Main The main object.
+   * @type {Main}
+   * @property {{argv: string[], length: number, "input.txt": string[]}} arguments The arguments of the program.
+   * @property {NodeJS.ProcessEnv} env The environment of the program.
+   * @property {string} file The name of the file.
+   * @property {string} interpreter The name of the interpreter.
+   * @version 1.1.0
+   */
   const main = {
+    /**
+     * @property {string[]} argv The arguments of the program.
+     * @property {number} length The length of the arguments.
+     * @property {string[]} "input.txt" The content of the file.
+     */
     arguments: {
       argv: process.argv.slice(2),
       length: process.argv.length,
-      // from ./input.txt
-      "input.txt": await FS.promises.readFile("./input.txt", "utf8", (err, data) => {
-        if (err) throw err;
-        return data.toString().trim().split("\n");
-      }),
+      "input.txt": await FS.promises.readFile(
+        "./input.txt",
+        "utf8",
+        /**
+         * @param {NodeJS.ErrnoException} err
+         * @param {string} data
+         * @returns {string[]}
+         */
+        (err, data) => {
+          if (err) throw err;
+          return data.toString().trim().valueOf();
+        },
+      ),
     },
+    env: process.env,
     file: process.argv[1],
     interpreter: process.argv[0],
+    [Symbol.toStringTag]: "Module",
+    [Symbol.for("nodejs.util.inspect.custom")]: () => {
+      return `Module ${JSON.stringify(main, null, 2).replace(/\:/g, ": ")}`;
+    },
+    // Attribute for `main` but as a map.
+    [Symbol.for("map")]: Object.prototype.mappify.bind(this)(),
   };
+  Object.setPrototypeOf(main, Object.prototype);
+  Object.freeze(main);
   Object.defineProperties(process, {
     arguments: {
       value: main.arguments,
@@ -657,7 +790,21 @@ const dn = function doNothing() {
     },
   });
   try {
-    console.log(mappify(main));
+    // @main
+    const ws = new WritableStream({
+      write(chunk) {
+        console.log(chunk);
+      },
+    });
+    const rs = new ReadableStream({
+      async start(controller) {
+        for (const i of main.arguments["input.txt"].split("\n")) {
+          controller.enqueue(i);
+        }
+        controller.close();
+      },
+    });
+    rs.pipeTo(ws);
   } catch (
     /**
      * The error that occurred.
