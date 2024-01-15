@@ -848,8 +848,7 @@ function Double(num) {
   "use strict";
   /**
    * The object that contrains the main info for the program.
-   * @typedef {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: object}} Main The main object.
-   * @type {Main}
+   * @type {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: object}}
    * @property {{argv: string[], length: number, "input.txt": string[], env: NodeJS.ProcessEnv, file: string, interpreter: string}} arguments The arguments of the program.
    * @property {NodeJS.ProcessEnv} env The environment of the program.
    * @property {string} file The name of the file.
