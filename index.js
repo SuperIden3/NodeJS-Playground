@@ -1,7 +1,7 @@
 console.time("Code");
 //------------------------------------------------------------//
 
-// Imports here.
+//@imports
 const pickRandom = require("./pickRandom.js");
 const range = require("./range.js");
 
@@ -22,7 +22,6 @@ const TRANSLATE = require("translate");
 require("dotenv").config();
 
 //------------------------------------------------------------//
-// Custom functions or pre-defined variables here.
 
 /**
  * Decode a buffered array.
@@ -714,6 +713,129 @@ const cipher = {
       .valueOf();
   },
 };
+/**
+ * The `Integer` function.
+ * @param {number} num The number to be converted to an `Integer`.
+ * @typedef {number|object} Integer
+ * @returns {Integer}
+ * @version 1.0.0
+ */
+function Integer(num) {
+  num = Number(num);
+  if (new.target) {
+    /**
+     * The `Integer` class.
+     * @class
+     * @extends {Number}
+     * @version 1.0.0
+     * @example
+     * ```js
+     * const int = new Integer(5);
+     * console.log(int); // 5
+     * const int2 = new Integer(5.5);
+     * console.log(int2); // 5
+     * ```
+     */
+    const Int = class Integer extends Number {
+      constructor(value) {
+        super(Math.floor(value));
+        Object.setPrototypeOf(this, Number.prototype);
+        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+          `${main.colors.yellow}[Number (Integer): ${Math.floor(value)}]${
+            main.colors.Reset
+          }`;
+      }
+    };
+    return Number(new Int(num));
+  } else {
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Integer): ${Math.floor(value)}]${
+        main.colors.Reset
+      }`;
+    return Number(Math.floor(num));
+  }
+}
+/**
+ * The `Float` function.
+ * @param {number} num The number to be converted to an `Float`.
+ * @typedef {number|object} Float
+ * @returns {Float}
+ * @version 1.0.0
+ */
+function Float(num) {
+  num = Number(num);
+  if (new.target) {
+    /**
+     * The `Float` class.
+     * @class
+     * @extends {Number}
+     * @version 1.0.0
+     * @example
+     * ```js
+     * const float = new Float(5.5);
+     * console.log(float); // 5.5
+     * const float2 = new Float(5);
+     * console.log(float2); // 5
+     * ```
+     */
+    const Flt = class Float extends Number {
+      constructor(value) {
+        value = value.toFixed(9);
+        super(parseFloat(value));
+        Object.setPrototypeOf(this, Number.prototype);
+        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+          `${main.colors.yellow}[Number (Float): ${value}]${main.colors.Reset}`;
+      }
+    };
+    return Number(new Flt(num));
+  } else {
+    num = num.toFixed(9);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Float): ${value}]${main.colors.Reset}`;
+    return Number(num);
+  }
+}
+/**
+ * The `Double` function.
+ * @param {number} num The number to be converted to an `Double`.
+ * @typedef {number|object} Double
+ * @returns {Double}
+ * @version 1.0.0
+ */
+function Double(num) {
+  num = Number(num);
+  if (new.target) {
+    /**
+     * The `Double` class.
+     * @class
+     * @extends {Number}
+     * @version 1.0.0
+     * @example
+     * ```js
+     * const double = new Double(5.5);
+     * console.log(double); // 5.5
+     * const double2 = new Double(5);
+     * console.log(double2); // 5
+     * ```
+     */
+    const Dbl = class Double extends Number {
+      constructor(value) {
+        value = value.toFixed(15);
+        super(parseFloat(value));
+        Object.setPrototypeOf(this, Number.prototype);
+        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+          `${main.colors.yellow}[Number (Double): ${value}]${main.colors.Reset}`;
+      }
+    };
+    return Number(new Dbl(num));
+  } else {
+    num = num.toFixed(15);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Double): ${value}]${main.colors.Reset}`;
+    return Number(num);
+  }
+}
+//@functions
 //----------------------------------------------------------//
 /**
  * Main function for code.
@@ -762,10 +884,62 @@ const cipher = {
     interpreter: process.argv[0],
     [Symbol.toStringTag]: "Module",
     [Symbol.for("nodejs.util.inspect.custom")]: () => {
-      return `Module ${JSON.stringify(main, null, 2).replace(/\:/g, ": ")}`;
+      return `${main.colors.cyan}Module ${JSON.stringify(main, null, 2).replace(
+        /\:/g,
+        ": ",
+      )}${main.colors.reset}`;
     },
     // Attribute for `main` but as a map.
-    [Symbol.for("map")]: Object.prototype.mappify.bind(this)(),
+    [Symbol.for("map")]: (() => {
+      const val = mappify.call(this);
+      val[Symbol.for("nodejs.util.inspect.custom")] = () => {
+        return `${this.colors.bold}Map ${JSON.stringify(main, null, 2).replace(
+          /\:/g,
+          ": ",
+        )}${this.colors.reset}`;
+      };
+      return val;
+    })(),
+    colors: {
+      red: "\x1b[31m",
+      green: "\x1b[32m",
+      yellow: "\x1b[33m",
+      blue: "\x1b[34m",
+      magenta: "\x1b[35m",
+      cyan: "\x1b[36m",
+      white: "\x1b[37m",
+      black: "\x1b[30m",
+      reset: "\x1b[0m",
+      bold: "\x1b[1m",
+      underline: "\x1b[4m",
+      blink: "\x1b[5m",
+      reverse: "\x1b[7m",
+      hidden: "\x1b[8m",
+      Blue: "\u001b[34m",
+      Reset: "\u001b[0m",
+      Black: "\u001b[30m",
+      Red: "\u001b[31m",
+      Green: "\u001b[32m",
+      Yellow: "\u001b[33m",
+      Magenta: "\u001b[35m",
+      Cyan: "\u001b[36m",
+      White: "\u001b[37m",
+      Gray: "\u001b[90m",
+      "Bright Red": "\u001b[91m",
+      "Bright Green": "\u001b[92m",
+      "Bright Yellow": "\u001b[93m",
+      "Bright Magenta": "\u001b[95m",
+      "Bright Cyan": "\u001b[96m",
+      "Bright White": "\u001b[97m",
+      "Bright Black": "\u001b[30;1m",
+      "Bright Blue": "\u001b[34;1m",
+      "Bright Cyan": "\u001b[36;1m",
+      "Bright Magenta": "\u001b[35;1m",
+      "Bright White": "\u001b[37;1m",
+      "Bright Yellow": "\u001b[33;1m",
+      "Bright Gray": "\u001b[90;1m",
+      "Dark Gray": "\u001b[90;2m",
+    },
   };
   Object.setPrototypeOf(main, Object.prototype);
   Object.freeze(main);
@@ -793,18 +967,32 @@ const cipher = {
     // @main
     const ws = new WritableStream({
       write(chunk) {
-        console.log(chunk);
+        console.log(
+          "\r\t" + Buffer.from(chunk, "latin1").toString("base64url"),
+        );
       },
     });
     const rs = new ReadableStream({
       async start(controller) {
-        for (const i of main.arguments["input.txt"].split("\n")) {
-          controller.enqueue(i);
-        }
-        controller.close();
+        FS.promises
+          .readFile("./input.txt", {
+            encoding: "latin1",
+            flag: "r",
+          })
+          .then((data) => {
+            for (const i of Buffer.from(data, "latin1").toString().split("\n"))
+              controller.enqueue(i);
+          })
+          .catch((err) => {
+            throw err;
+          })
+          .finally(() => {
+            controller.close();
+          });
       },
     });
     rs.pipeTo(ws);
+    console.log({ rs, ws });
   } catch (
     /**
      * The error that occurred.
@@ -817,6 +1005,7 @@ const cipher = {
     console.error(e);
     process.kill(process.pid, "SIGINT");
   } finally {
+    module.exports = { main, all: globalThis };
     console.timeEnd("Code");
   }
 })();

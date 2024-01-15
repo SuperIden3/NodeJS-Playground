@@ -8,16 +8,16 @@
   "tasks": {
     "update": {
       "name": "update",
-      "command": "yarn run update"
+      "command": "npm run update | les"
     },
     "start": {
       "name": "start",
-      "command": "clear\nyarn start",
+      "command": "reset\nyarn start",
       "runAtStart": true
     },
     "build": {
       "name": "build",
-      "command": "clear\nyarn build",
+      "command": "yarn build | less",
       "runAtStart": false
     },
     "nodemon": {
@@ -35,6 +35,10 @@
     "uninstall": {
       "name": "uninstall",
       "command": "yarn run rmpkg"
+    },
+    "watch": {
+      "name": "watch",
+      "command": "npm run dev"
     }
   }
 }
