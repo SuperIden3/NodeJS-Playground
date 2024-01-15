@@ -848,13 +848,15 @@ function Double(num) {
   "use strict";
   /**
    * The object that contrains the main info for the program.
-   * @typedef {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string}} Main The main object.
+   * @typedef {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: object}} Main The main object.
    * @type {Main}
-   * @property {{argv: string[], length: number, "input.txt": string[]}} arguments The arguments of the program.
+   * @property {{argv: string[], length: number, "input.txt": string[], env: NodeJS.ProcessEnv, file: string, interpreter: string}} arguments The arguments of the program.
    * @property {NodeJS.ProcessEnv} env The environment of the program.
    * @property {string} file The name of the file.
    * @property {string} interpreter The name of the interpreter.
-   * @version 1.1.0
+   * @property {Map<string, string>} [Symbol.for("map")] The map of the program.
+   * @property {object} colors The colors of the program.
+   * @version 1.1.1
    */
   const main = {
     /**
@@ -900,6 +902,9 @@ function Double(num) {
       };
       return val;
     })(),
+    /**
+     * @see https://github.com/SuperIden3/NodeJS-Playground/blob/main/Color%20Codes%20(NodeJS).md
+     */
     colors: {
       red: "\x1b[31m",
       green: "\x1b[32m",

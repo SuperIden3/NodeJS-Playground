@@ -5,11 +5,12 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "node --trace-warnings index.js",
+    "start": "printf \"\\033[s\";read -p \"Write the output to \\`output.txt\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --trace-warnings index.js > output.txt; else node --trace-warnings index.js; fi",
     "paginate": "read -p \"Command: \" _cmd && $_cmd > out.txt && less out.txt && rm ./out.txt",
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
-    "build": "tsc && webpack --config webpack.config.js",
-    "update": "yarn install | less && sudo apt-get update | less && npm i | less",
+    "build": "npm run update; sudo apt-get install most; npm i node; sudo apt-get upgrade; npm run update",
+    "update": "yarn install && sudo apt update && npm i",
+    "update2": "yarn install | less && sudo apt-get update | less && npm i | less",
     "apkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn add $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt-get install $package; else npm i $package; fi && echo Done!",
     "rmpkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn remove $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt remove $package; else npm uninstall $package; fi && echo Done!"
   },
@@ -33,7 +34,6 @@
     "dotenv": "^16.3.1",
     "node": "^19.8.1",
     "translate": "^1.4.1",
-    "webpack": "^5.89.0",
     "webpack-cli": "^5.1.4",
     "zod": "^3.20.2"
   },
@@ -43,7 +43,6 @@
     "node-fetch": "^3.3.0",
     "prompt-sync": "^4.2.0",
     "readline": "^1.3.0",
-    "tsc": "^2.0.4",
     "typescript": "^4.9.5",
     "yargs": "^17.6.2"
   }

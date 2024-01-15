@@ -38,6 +38,18 @@ function println(str, ...args) {
   for (const i in searches) {
     str = str.replace(searches[i], colors[args[i]]);
   }
-  process.stdout.write(String(str));
+  for (const i in args) {
+    str = str.replace("%s", args[i]);
+  }
+  for (const i in args) {
+    // Search for `%d` or `%i`.
+    str = str.replace(/(%[di])/g, args[i]);
+  }
+  for (const i in args) {
+    // Search for `%f`.
+    str = str.replace(/(%f)/g, args[i]);
+  }
+
+  return process.stdout.write(String(str));
 }
-println("Hello, %cWorld!", "Red");
+println("Hello, %s!", "World");
