@@ -1,17 +1,12 @@
 <!DOCTYPE html>
 <html>
 
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Color Codes (NodeJS)</title>
-  <link rel="stylesheet" href="https://stackedit.io/style.css" />
-</head>
-
 <body class="stackedit">
   <div class="stackedit__left">
     <div class="stackedit__toc">
-      
+
+<details>
+<summary>Table of Contents</summary>
 <ul>
 <li><a href="#color-codes-reference">Color Codes Reference</a>
 <ul>
@@ -23,12 +18,12 @@
 </ul>
 </li>
 </ul>
-
-    </div>
-  </div>
-  <div class="stackedit__right">
-    <div class="stackedit__html">
-      <h1 id="color-codes-reference">Color Codes Reference</h1>
+</details>
+</div>
+</div>
+<div class="stackedit__right">
+<div class="stackedit__html">
+<h1 id="color-codes-reference">Color Codes Reference</h1>
 <p>This document meticulously outlines each attribute within the <code>colors</code> object, which provides various color codes for enhancing terminal output.</p>
 <h2 id="basic-colors">Basic Colors</h2>
 <p>These attributes set the foreground text color:</p>
