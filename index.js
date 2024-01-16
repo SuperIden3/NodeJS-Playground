@@ -971,21 +971,21 @@ function Double(num) {
     // @main
     const ws = new WritableStream({
       write(chunk) {
-        console.log(
-          "\r\t" + Buffer.from(chunk, "latin1").toString("base64url"),
-        );
+        console.log(Buffer.from("\r\t" + chunk, "ascii"));
       },
     });
     const rs = new ReadableStream({
       async start(controller) {
         FS.promises
           .readFile("./input.txt", {
-            encoding: "latin1",
+            encoding: "ascii",
             flag: "r",
           })
           .then((data) => {
-            for (const i of Buffer.from(data, "latin1").toString().split("\n"))
-              controller.enqueue(i);
+            for (const i of Buffer.from(data, "ascii")
+              .toString("utf-8")
+              .split("\n"))
+              controller.enqueue(i + "\n");
           })
           .catch((err) => {
             throw err;
