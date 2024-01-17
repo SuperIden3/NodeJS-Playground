@@ -848,13 +848,13 @@ function Double(num) {
   "use strict";
   /**
    * The object that contrains the main info for the program.
-   * @type {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: object}}
+   * @type {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: { red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string}}}
    * @property {{argv: string[], length: number, "input.txt": string[], env: NodeJS.ProcessEnv, file: string, interpreter: string}} arguments The arguments of the program.
    * @property {NodeJS.ProcessEnv} env The environment of the program.
    * @property {string} file The name of the file.
    * @property {string} interpreter The name of the interpreter.
    * @property {Map<string, string>} [Symbol.for("map")] The map of the program.
-   * @property {object} colors The colors of the program.
+   * @property {{ red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string}} colors The colors of the program.
    * @version 1.1.1
    */
   const main = {
@@ -885,10 +885,11 @@ function Double(num) {
     interpreter: process.argv[0],
     [Symbol.toStringTag]: "Module",
     [Symbol.for("nodejs.util.inspect.custom")]: () => {
-      return `${main.colors.cyan}Module ${JSON.stringify(main, null, 2).replace(
-        /\:/g,
-        ": ",
-      )}${main.colors.reset}`;
+      return `${main[Symbol.toStringTag]} ${JSON.stringify(
+        main,
+        null,
+        -1,
+      ).replace(/\:/g, ": ")}${main.colors.reset}`;
     },
     // Attribute for `main` but as a map.
     [Symbol.for("map")]: (() => {
@@ -971,32 +972,70 @@ function Double(num) {
     // @main
     const ws = new WritableStream({
       write(chunk) {
-        console.log(Buffer.from("\r\t" + chunk, "ascii"));
+        console.log(
+          "\u001b[4m" +
+            Buffer.from("\r\t" + chunk, "latin1").toString("utf8") +
+            "\u001b[0m",
+        );
       },
     });
     const rs = new ReadableStream({
       async start(controller) {
         FS.promises
           .readFile("./input.txt", {
-            encoding: "ascii",
+            encoding: "latin1",
             flag: "r",
           })
-          .then((data) => {
-            for (const i of Buffer.from(data, "ascii")
-              .toString("utf-8")
-              .split("\n"))
-              controller.enqueue(i + "\n");
-          })
-          .catch((err) => {
-            throw err;
-          })
+          .then(
+            (data) => {
+              for (const i of Buffer.from(data, "latin1")
+                .toString("utf-8")
+                .split("\n"))
+                controller.enqueue(i + "\n");
+            },
+            (err) => {
+              controller.error(
+                (() => {
+                  const e = [
+                    new Error("Controller's \u001b[3malready\u001b[0m closed."),
+                    err,
+                    new Event("error", { error: err }),
+                  ];
+                  return {
+                    error: {
+                      name: e[0].name,
+                      message: e[0].message,
+                      stack: e[0].stack,
+                    },
+                    actual: {
+                      name: e[1].name,
+                      message: e[1].message,
+                      stack: e[1].stack,
+                    },
+                    expected: {
+                      name: e[2].name,
+                      message: e[2].message,
+                      stack: e[2].stack,
+                    },
+                  };
+                })(),
+              );
+            },
+          )
           .finally(() => {
-            controller.close();
+            try {
+              controller.close();
+            } catch (e) {
+              console.error(e);
+            }
           });
       },
     });
-    rs.pipeTo(ws);
-    console.log({ rs, ws });
+    rs.pipeTo(ws, { preventClose: true })
+      .then(() => {
+        console.log(main.colors.bold, { rs, ws }, main.colors.Reset);
+      })
+      .then(() => console.log(main));
   } catch (
     /**
      * The error that occurred.
