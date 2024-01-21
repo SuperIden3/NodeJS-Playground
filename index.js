@@ -290,16 +290,6 @@ function factorial(n) {
   if (n === 1 || n === 1n) return n;
   return n * factorial(n - (typeof n === "bigint" ? 1n : 1));
 }
-function YouSuckError(message) {
-  const error = new Error(message);
-  Object.defineProperty(error, "name", {
-    value: "YouSuckError",
-    writable: false,
-    enumerable: true,
-    configurable: false,
-  });
-  return error;
-}
 /**
  * Execute a shell command.
  * @param {string} command The shell command to execute.
@@ -871,7 +861,6 @@ const customs = {
   min,
   Person,
   factorial,
-  YouSuckError,
   esc,
   convertTo,
   Union,
