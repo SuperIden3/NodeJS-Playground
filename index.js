@@ -162,9 +162,9 @@ class URL {
    */
   constructor(_url) {
     if (_url.startsWith("http://") || _url.startsWith("https://")) {
-      this["url"] = z.string().parse(_url);
+      this["url"] = ZOD.string().parse(_url);
     } else {
-      this["url"] = z.string.parse(`https://${_url}`);
+      this["url"] = ZOD.string().parse(`https://${_url}`);
     }
   }
   async open() {
@@ -217,7 +217,8 @@ const rsra = async function* readableStreamReadAll(readableStream) {
  */
 function max(...values) {
   let maximum = values[0];
-  for (const num of values) if (z.number().parse(num) > maximum) maximum = num;
+  for (const num of values)
+    if (ZOD.number().parse(num) > maximum) maximum = num;
   return maximum;
 }
 /**
@@ -228,7 +229,8 @@ function max(...values) {
  */
 function min(...values) {
   let minimum = values[0];
-  for (const num of values) if (z.number().parse(num) < minimum) minimum = num;
+  for (const num of values)
+    if (ZOD.number().parse(num) < minimum) minimum = num;
   return minimum;
 }
 /**
@@ -241,31 +243,27 @@ function min(...values) {
  * console.log(person); // Person { name: "John", age: 25, hobbies: ["hiking", "reading"] }
  */
 class Person {
-  name = z.string({
+  name = ZOD.string({
     invalid_type_error: "Must be a string for a name.",
     required_error: "The name is required for the person.",
     description: "This is the name for the person.",
   });
-  age = z
-    .number({
+  age = ZOD.number({
+    invalid_type_error: "Must be a number for an age.",
+    required_error: "The age is required for the person.",
+    description: "This is the age for the person.",
+  }).or(
+    ZOD.bigint({
       invalid_type_error: "Must be a number for an age.",
       required_error: "The age is required for the person.",
       description: "This is the age for the person.",
-    })
-    .or(
-      z.bigint({
-        invalid_type_error: "Must be a number for an age.",
-        required_error: "The age is required for the person.",
-        description: "This is the age for the person.",
-      }),
-    );
-  hobbies = z
-    .array(z.string(), {
-      invalid_type_error: "Must be an array with all strings for hobbies.",
-      required_error: "The hobbies is required for the person.",
-      description: "These are the hobbies for the person.",
-    })
-    .or(z.object(new Set()));
+    }),
+  );
+  hobbies = ZOD.array(ZOD.string(), {
+    invalid_type_error: "Must be an array with all strings for hobbies.",
+    required_error: "The hobbies is required for the person.",
+    description: "These are the hobbies for the person.",
+  }).or(ZOD.object(new Set()));
   constructor(name, age, hobbies) {
     if (age <= 0)
       throw new Error(
@@ -286,7 +284,7 @@ class Person {
  * @returns {FactorialResult}
  */
 function factorial(n) {
-  z.number().or(z.bigint()).parse(n);
+  ZOD.number().or(ZOD.bigint()).parse(n);
   if (n === 1 || n === 1n) return n;
   return n * factorial(n - (typeof n === "bigint" ? 1n : 1));
 }
@@ -1056,6 +1054,7 @@ const main = {
     e
   ) {
     console.error(e);
+    console.error(new Event("error", { error: e, type: "error", message: e.message, stack: e.stack, name: e.name }));
     process.kill(process.pid, "SIGINT");
   } finally {
     console.timeEnd("Code");
