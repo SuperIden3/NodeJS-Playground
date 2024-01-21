@@ -15,14 +15,32 @@ const STREAM = require("stream");
 const _URL = require("url");
 const ZOD = require("zod");
 const TRANSLATE = require("translate");
+const DOTENV = require("dotenv");
+DOTENV.config();
+const CRYPTO = require("crypto");
+const _JSDOM = require("jsdom");
 /*const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
 });*/
-require("dotenv").config();
 
+const imports = {
+  util: UTIL,
+  fs: FS,
+  os: OS,
+  buffer: BUFFER,
+  http: HTTP,
+  yargs: require("yargs"),
+  stream: STREAM,
+  url: _URL,
+  zod: ZOD,
+  translate: TRANSLATE,
+  dotenv: DOTENV,
+  crypto: CRYPTO,
+  readline: require("readline"),
+  jsdom: _JSDOM,
+};
 //------------------------------------------------------------//
-
 /**
  * Decode a buffered array.
  * @param {ArrayBuffer} bufferedArray The buffered array to decode.
@@ -723,33 +741,15 @@ const cipher = {
 function Integer(num) {
   num = Number(num);
   if (new.target) {
-    /**
-     * The `Integer` class.
-     * @class
-     * @extends {Number}
-     * @version 1.0.0
-     * @example
-     * ```js
-     * const int = new Integer(5);
-     * console.log(int); // 5
-     * const int2 = new Integer(5.5);
-     * console.log(int2); // 5
-     * ```
-     */
-    const Int = class Integer extends Number {
-      constructor(value) {
-        super(Math.floor(value));
-        Object.setPrototypeOf(this, Number.prototype);
-        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-          `${main.colors.yellow}[Number (Integer): ${Math.floor(value)}]${
-            main.colors.Reset
-          }`;
-      }
-    };
-    return Number(new Int(num));
+    Object.setPrototypeOf(this, Number.prototype);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${
+        main.colors.Reset
+      }`;
+    return Number(Math.floor(num));
   } else {
     this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-      `${main.colors.yellow}[Number (Integer): ${Math.floor(value)}]${
+      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${
         main.colors.Reset
       }`;
     return Number(Math.floor(num));
@@ -765,33 +765,14 @@ function Integer(num) {
 function Float(num) {
   num = Number(num);
   if (new.target) {
-    /**
-     * The `Float` class.
-     * @class
-     * @extends {Number}
-     * @version 1.0.0
-     * @example
-     * ```js
-     * const float = new Float(5.5);
-     * console.log(float); // 5.5
-     * const float2 = new Float(5);
-     * console.log(float2); // 5
-     * ```
-     */
-    const Flt = class Float extends Number {
-      constructor(value) {
-        value = value.toFixed(9);
-        super(parseFloat(value));
-        Object.setPrototypeOf(this, Number.prototype);
-        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-          `${main.colors.yellow}[Number (Float): ${value}]${main.colors.Reset}`;
-      }
-    };
-    return Number(new Flt(num));
+    Object.setPrototypeOf(this, Number.prototype);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Float): ${num.toFixed(9)}]${main.colors.Reset}`;
+    return Number(Number(num).toFixed(9));
   } else {
     num = num.toFixed(9);
     this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-      `${main.colors.yellow}[Number (Float): ${value}]${main.colors.Reset}`;
+      `${main.colors.yellow}[Number (Float): ${num}]${main.colors.Reset}`;
     return Number(num);
   }
 }
@@ -805,38 +786,215 @@ function Float(num) {
 function Double(num) {
   num = Number(num);
   if (new.target) {
-    /**
-     * The `Double` class.
-     * @class
-     * @extends {Number}
-     * @version 1.0.0
-     * @example
-     * ```js
-     * const double = new Double(5.5);
-     * console.log(double); // 5.5
-     * const double2 = new Double(5);
-     * console.log(double2); // 5
-     * ```
-     */
-    const Dbl = class Double extends Number {
-      constructor(value) {
-        value = value.toFixed(15);
-        super(parseFloat(value));
-        Object.setPrototypeOf(this, Number.prototype);
-        this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-          `${main.colors.yellow}[Number (Double): ${value}]${main.colors.Reset}`;
-      }
-    };
-    return Number(new Dbl(num));
+    Object.setPrototypeOf(this, Number.prototype);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Double): ${num.toFixed(15)}]${main.colors.Reset}`;
+    return Number(Number(num).toFixed(15));
   } else {
     num = num.toFixed(15);
     this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-      `${main.colors.yellow}[Number (Double): ${value}]${main.colors.Reset}`;
+      `${main.colors.yellow}[Number (Double): ${num}]${main.colors.Reset}`;
     return Number(num);
   }
 }
+const gci = function getCustomInspect() {
+  return Symbol.for("nodejs.util.inspect.custom");
+};
+function _Session() {
+  const obj = {};
+  const closed = [false];
+  const open = [true];
+  let i = 0;
+  obj.closed = () => new Promise((r) => (closed[i] ? r(true) : undefined));
+  obj.opened = () => new Promise((r) => (open[i] ? r(true) : undefined));
+  obj.getInfo = () => ({
+    object: { opened: obj.opened(), closed: obj.closed() },
+    map: new Map(
+      Object.entries({ opened: obj.opened(), closed: obj.closed() }),
+    ),
+  });
+  obj.close = () => {
+    i = i + 1;
+    open[i] = false;
+    closed[i] = true;
+    return true;
+  };
+  obj.open = () => {
+    i = i + 1;
+    open[i] = true;
+    closed[i] = false;
+    return true;
+  };
+  if (new.target) {
+    Object.assign(this, { object: obj, map: new Map(Object.entries(obj)) });
+    Object.freeze(this);
+  } else {
+    return { object: obj, map: new Map(Object.entries(obj)) };
+  }
+  return obj;
+}
+function Octal(num) {
+  num = Number(num);
+  if (new.target) {
+    Object.setPrototypeOf(this, Number.prototype);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Octal): ${parseInt(num, 10).toString(8)}]${main.colors.Reset}`;
+    return parseInt(num, 10).toString(8);
+  } else {
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Octal): ${parseInt(num, 10).toString(8)}]${main.colors.Reset}`;
+    return parseInt(num, 10).toString(8);
+  }
+}
+function Hex(num) {
+  num = Number(num);
+  if (new.target) {
+    Object.setPrototypeOf(this, Number.prototype);
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Hex): ${parseInt(num, 10).toString(16)}]${main.colors.Reset}`;
+    return parseInt(num, 10).toString(16);
+  } else {
+    this[Symbol.for("nodejs.util.inspect.custom")] = () =>
+      `${main.colors.yellow}[Number (Hex): ${parseInt(num, 10).toString(16)}]${main.colors.Reset}`;
+    return parseInt(num, 10).toString(16);
+  }
+}
 //@functions
+const customs = {
+  encode,
+  decode,
+  enumerate,
+  LineReader,
+  URL,
+  rsra,
+  max,
+  min,
+  Person,
+  factorial,
+  YouSuckError,
+  esc,
+  convertTo,
+  Union,
+  Trace,
+  cet,
+  perimeter,
+  format,
+  Messager,
+  translate,
+  toFile,
+  prettify,
+  mappify,
+  unmappify,
+  dn,
+  cipher,
+  Integer,
+  Float,
+  Double,
+  gci,
+  _Session,
+  Octal,
+  Hex,
+};
 //----------------------------------------------------------//
+/**
+ * The object that contrains the main info for the program.
+ * @type {({arguments: {argv: () =.>string[], length: () => number, [Symbol.for("input.txt")]: Promise<string[]>}, env: () => NodeJS.ProcessEnv, file:  () => string, interpreter: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: () => Map<string, string>, colors: { red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string, [Symbol.for("nodejs.util.inspect.custom")]: () => string}})}
+ * @property {{argv: () => string[],() => length: number, "input.txt": string[], env: NodeJS.ProcessEnv, file: string, interpreter: string}} arguments The arguments of the program.
+ * @property {() => NodeJS.ProcessEnv} env The environment of the program.
+ * @property {() => string} file The name of the file.
+ * @property {() => string} interpreter The name of the interpreter.
+ * @property {() => Map<string, string>} [Symbol.for("map")] The map of the program.
+ * @property {{ red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string}} colors The colors of the program.
+ * @version 1.2.0
+ */
+const main = {
+  /**
+   * @property {string[]} argv The arguments of the program.
+   * @property {number} length The length of the arguments.
+   * @property {Promise<string[]>} "input.txt" The content of the file.
+   */
+  arguments: {
+    entire: () => process.argv,
+    argv: () => process.argv.slice(2),
+    length: () => process.argv.length,
+    [Symbol.for("input.txt")]: FS.promises.readFile(
+      "./input.txt",
+      "utf8",
+      /**
+       * @param {NodeJS.ErrnoException} err
+       * @param {string} data
+       * @returns {string[]}
+       */
+      (err, data) => {
+        if (err) throw err;
+        return data.toString().trim().valueOf();
+      },
+    ),
+  },
+  env: () => process.env,
+  file: () => process.argv[1],
+  interpreter: () => process.argv[0],
+  [Symbol.toStringTag]: "Main",
+  [Symbol.for("nodejs.util.inspect.custom")]: () => {
+    return `${main.colors.Cyan}${main[Symbol.toStringTag]} { arguments: { argv: [ ${main.arguments.argv().join(", ")} ], length: ${main.arguments.length()}, "input.txt": [ ${main.arguments[Symbol.for("input.txt")]} ] }, env: ${main.env()}, file: ${main.file()}, interpreter: ${main.interpreter()} }${main.colors.reset}`;
+  },
+  [Symbol.for("map")]: () => {
+    const val = mappify.call(this);
+    val[Symbol.for("nodejs.util.inspect.custom")] = () => {
+      return `${main.colors.bold}Map ${JSON.stringify(main, null, 2).replace(
+        /\:/g,
+        ": ",
+      )}${main.colors.reset}`;
+    };
+    return val;
+  },
+  /**
+   * @see https://github.com/SuperIden3/NodeJS-Playground/blob/main/Color%20Codes%20(NodeJS).md
+   */
+  colors: {
+    red: "\x1b[31m",
+    green: "\x1b[32m",
+    yellow: "\x1b[33m",
+    blue: "\x1b[34m",
+    magenta: "\x1b[35m",
+    cyan: "\x1b[36m",
+    white: "\x1b[37m",
+    black: "\x1b[30m",
+    reset: "\x1b[0m",
+    bold: "\x1b[1m",
+    underline: "\x1b[4m",
+    blink: "\x1b[5m",
+    reverse: "\x1b[7m",
+    hidden: "\x1b[8m",
+    Blue: "\u001b[34m",
+    Reset: "\u001b[0m",
+    Black: "\u001b[30m",
+    Red: "\u001b[31m",
+    Green: "\u001b[32m",
+    Yellow: "\u001b[33m",
+    Magenta: "\u001b[35m",
+    Cyan: "\u001b[36m",
+    White: "\u001b[37m",
+    Gray: "\u001b[90m",
+    "Bright Red": "\u001b[91m",
+    "Bright Green": "\u001b[92m",
+    "Bright Yellow": "\u001b[93m",
+    "Bright Magenta": "\u001b[95m",
+    "Bright Cyan": "\u001b[96m",
+    "Bright White": "\u001b[97m",
+    "Bright Black": "\u001b[30;1m",
+    "Bright Blue": "\u001b[34;1m",
+    "Bright Cyan": "\u001b[36;1m",
+    "Bright Magenta": "\u001b[35;1m",
+    "Bright White": "\u001b[37;1m",
+    "Bright Yellow": "\u001b[33;1m",
+    "Bright Gray": "\u001b[90;1m",
+    "Dark Gray": "\u001b[90;2m",
+    [Symbol.for("nodejs.util.inspect.custom")]: () => {
+      return `${this} ${prettify.call(this).replace(/\:/g, ": ")}${this.reset}`;
+    },
+  },
+};
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
@@ -844,110 +1002,9 @@ function Double(num) {
  * @param {Arguments} args The arguments for the function.
  * @returns {IIAFE}
  */
-(async function main() {
+(async function Main() {
   "use strict";
-  /**
-   * The object that contrains the main info for the program.
-   * @type {{arguments: {argv: string[], length: number, "input.txt": string[]}, env: NodeJS.ProcessEnv, file: string, interpreter: string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: Map<string, string>, colors: { red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string}}}
-   * @property {{argv: string[], length: number, "input.txt": string[], env: NodeJS.ProcessEnv, file: string, interpreter: string}} arguments The arguments of the program.
-   * @property {NodeJS.ProcessEnv} env The environment of the program.
-   * @property {string} file The name of the file.
-   * @property {string} interpreter The name of the interpreter.
-   * @property {Map<string, string>} [Symbol.for("map")] The map of the program.
-   * @property {{ red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string}} colors The colors of the program.
-   * @version 1.1.1
-   */
-  const main = {
-    /**
-     * @property {string[]} argv The arguments of the program.
-     * @property {number} length The length of the arguments.
-     * @property {string[]} "input.txt" The content of the file.
-     */
-    arguments: {
-      argv: process.argv.slice(2),
-      length: process.argv.length,
-      "input.txt": await FS.promises.readFile(
-        "./input.txt",
-        "utf8",
-        /**
-         * @param {NodeJS.ErrnoException} err
-         * @param {string} data
-         * @returns {string[]}
-         */
-        (err, data) => {
-          if (err) throw err;
-          return data.toString().trim().valueOf();
-        },
-      ),
-    },
-    env: process.env,
-    file: process.argv[1],
-    interpreter: process.argv[0],
-    [Symbol.toStringTag]: "Module",
-    [Symbol.for("nodejs.util.inspect.custom")]: () => {
-      return `${main[Symbol.toStringTag]} ${JSON.stringify(
-        main,
-        null,
-        -1,
-      ).replace(/\:/g, ": ")}${main.colors.reset}`;
-    },
-    // Attribute for `main` but as a map.
-    [Symbol.for("map")]: (() => {
-      const val = mappify.call(this);
-      val[Symbol.for("nodejs.util.inspect.custom")] = () => {
-        return `${this.colors.bold}Map ${JSON.stringify(main, null, 2).replace(
-          /\:/g,
-          ": ",
-        )}${this.colors.reset}`;
-      };
-      return val;
-    })(),
-    /**
-     * @see https://github.com/SuperIden3/NodeJS-Playground/blob/main/Color%20Codes%20(NodeJS).md
-     */
-    colors: {
-      red: "\x1b[31m",
-      green: "\x1b[32m",
-      yellow: "\x1b[33m",
-      blue: "\x1b[34m",
-      magenta: "\x1b[35m",
-      cyan: "\x1b[36m",
-      white: "\x1b[37m",
-      black: "\x1b[30m",
-      reset: "\x1b[0m",
-      bold: "\x1b[1m",
-      underline: "\x1b[4m",
-      blink: "\x1b[5m",
-      reverse: "\x1b[7m",
-      hidden: "\x1b[8m",
-      Blue: "\u001b[34m",
-      Reset: "\u001b[0m",
-      Black: "\u001b[30m",
-      Red: "\u001b[31m",
-      Green: "\u001b[32m",
-      Yellow: "\u001b[33m",
-      Magenta: "\u001b[35m",
-      Cyan: "\u001b[36m",
-      White: "\u001b[37m",
-      Gray: "\u001b[90m",
-      "Bright Red": "\u001b[91m",
-      "Bright Green": "\u001b[92m",
-      "Bright Yellow": "\u001b[93m",
-      "Bright Magenta": "\u001b[95m",
-      "Bright Cyan": "\u001b[96m",
-      "Bright White": "\u001b[97m",
-      "Bright Black": "\u001b[30;1m",
-      "Bright Blue": "\u001b[34;1m",
-      "Bright Cyan": "\u001b[36;1m",
-      "Bright Magenta": "\u001b[35;1m",
-      "Bright White": "\u001b[37;1m",
-      "Bright Yellow": "\u001b[33;1m",
-      "Bright Gray": "\u001b[90;1m",
-      "Dark Gray": "\u001b[90;2m",
-    },
-  };
   Object.setPrototypeOf(main, Object.prototype);
-  Object.freeze(main);
   Object.defineProperties(process, {
     arguments: {
       value: main.arguments,
@@ -968,6 +1025,12 @@ function Double(num) {
       configurable: false,
     },
   });
+  Object.assign(module.exports, {
+    main: main,
+    all: globalThis,
+    imports,
+    customs,
+  });
   try {
     // @main
     const ws = new WritableStream({
@@ -981,61 +1044,19 @@ function Double(num) {
     });
     const rs = new ReadableStream({
       async start(controller) {
-        FS.promises
-          .readFile("./input.txt", {
-            encoding: "latin1",
-            flag: "r",
-          })
-          .then(
-            (data) => {
-              for (const i of Buffer.from(data, "latin1")
-                .toString("utf-8")
-                .split("\n"))
-                controller.enqueue(i + "\n");
-            },
-            (err) => {
-              controller.error(
-                (() => {
-                  const e = [
-                    new Error("Controller's \u001b[3malready\u001b[0m closed."),
-                    err,
-                    new Event("error", { error: err }),
-                  ];
-                  return {
-                    error: {
-                      name: e[0].name,
-                      message: e[0].message,
-                      stack: e[0].stack,
-                    },
-                    actual: {
-                      name: e[1].name,
-                      message: e[1].message,
-                      stack: e[1].stack,
-                    },
-                    expected: {
-                      name: e[2].name,
-                      message: e[2].message,
-                      stack: e[2].stack,
-                    },
-                  };
-                })(),
-              );
-            },
-          )
-          .finally(() => {
-            try {
-              controller.close();
-            } catch (e) {
-              console.error(e);
-            }
-          });
+        for (const i of (await main.arguments[Symbol.for("input.txt")]).split(
+          "\n",
+        )) {
+          controller.enqueue(Buffer.from(i + "\n"), "latin1");
+        }
+        controller.close();
       },
     });
-    rs.pipeTo(ws, { preventClose: true })
+    rs.pipeTo(ws, { preventClose: false })
       .then(() => {
         console.log(main.colors.bold, { rs, ws }, main.colors.Reset);
       })
-      .then(() => console.log(main));
+      .catch(console.error);
   } catch (
     /**
      * The error that occurred.
@@ -1048,7 +1069,6 @@ function Double(num) {
     console.error(e);
     process.kill(process.pid, "SIGINT");
   } finally {
-    module.exports = { main, all: globalThis };
     console.timeEnd("Code");
   }
 })();
