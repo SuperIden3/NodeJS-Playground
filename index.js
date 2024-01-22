@@ -899,11 +899,11 @@ function _Session() {
    * @returns {void}
    */
   obj.once = (name, callback) => {
-    const once = () => {
-      et.removeEventListener(name, once);
-      callback();
-    };
-    et.addEventListener(name, once);
+    function handler(event) {
+      callback(event);
+      et.removeEventListener(name, handler);
+    }
+    et.addEventListener(name, handler);
   };
   if (new.target) {
     Object.assign(this, { object: obj, map: new Map(Object.entries(obj)) });
