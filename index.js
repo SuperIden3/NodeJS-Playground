@@ -785,33 +785,125 @@ function Double(num) {
     return Number(num);
   }
 }
+/**
+ * The `getCustomInspect` function.
+ * @returns {symbol} The symbol for custom inspect (`Symbol.for("nodejs.util.inspect.custom")`).
+ * @version 1.0.0
+ */
 const gci = function getCustomInspect() {
   return Symbol.for("nodejs.util.inspect.custom");
 };
+/**
+ * The `_Session` object.
+ * @returns {object} The `_Session` object.
+ * @version 1.0.0
+ */
 function _Session() {
   const obj = {};
   const closed = [false];
   const open = [true];
   let i = 0;
+  /**
+   * Checks if the `_Session` is **closed**.
+   * @returns {Promise<boolean>}
+   */
   obj.closed = () => new Promise((r) => (closed[i] ? r(true) : undefined));
+  /**
+   * Checks if the `_Session` is **opened**.
+   * @returns {Promise<boolean>}
+   */
   obj.opened = () => new Promise((r) => (open[i] ? r(true) : undefined));
+  /**
+   * Get the `_Session` info.
+   * @returns {{object: {opened: Promise<boolean>, closed: Promise<boolean>}, map: Map<string, Promise<boolean>>}}
+   */
   obj.getInfo = () => ({
     object: { opened: obj.opened(), closed: obj.closed() },
     map: new Map(
       Object.entries({ opened: obj.opened(), closed: obj.closed() }),
     ),
   });
+  const et = new EventTarget();
+  /**
+   * Closes the `_Session`.
+   * @returns {boolean} Shows if the function is successful.
+   */
   obj.close = () => {
     i = i + 1;
     open[i] = false;
     closed[i] = true;
+    const event = new Event("close");
+    event.data = {
+      ...obj.getInfo().object,
+      id: i,
+      eventtarget: {
+        addEventListener: (name, callback) =>
+          et.addEventListener(name, callback),
+        removeEventListener: (name, callback) =>
+          et.removeEventListener(name, callback),
+        dispatchEvent: () => {
+          throw new Error(
+            'Cannot use `dispatchEvent` in a `Session`, use `_Session.object.on()` or `_Session.map.get("on")()` instead.',
+          );
+        },
+      },
+    };
+    et.dispatchEvent(event);
     return true;
   };
+  /**
+   * Opens the `_Session`.
+   * @returns {boolean} Shows if the function is successful.
+   */
   obj.open = () => {
     i = i + 1;
     open[i] = true;
     closed[i] = false;
+    const event = new Event("open");
+    event.data = {
+      ...obj.getInfo().object,
+      id: i,
+      eventtarget: {
+        addEventListener: (name, callback) =>
+          et.addEventListener(name, callback),
+        removeEventListener: (name, callback) =>
+          et.removeEventListener(name, callback),
+        dispatchEvent: () => {
+          throw new Error(
+            'Cannot use `dispatchEvent` in a `Session`, use `_Session.object.on()` or `_Session.map.get("on")()` instead.',
+          );
+        },
+      },
+    };
+    et.dispatchEvent(event);
     return true;
+  };
+  /**
+   * Adds an event listener.
+   * @param {string} name The name of the event.
+   * @param {function} callback The callback function.
+   * @returns {void}
+   */
+  obj.on = (name, callback) => et.addEventListener(name, callback);
+  /**
+   * Removes an event listener.
+   * @param {string} name The name of the event.
+   * @param {function} callback The callback function.
+   * @returns {void}
+   */
+  obj.off = (name, callback) => et.removeEventListener(name, callback);
+  /**
+   * Adds an event listener once.
+   * @param {string} name The name of the event.
+   * @param {function} callback The callback function.
+   * @returns {void}
+   */
+  obj.once = (name, callback) => {
+    const once = () => {
+      et.removeEventListener(name, once);
+      callback();
+    };
+    et.addEventListener(name, once);
   };
   if (new.target) {
     Object.assign(this, { object: obj, map: new Map(Object.entries(obj)) });
@@ -819,7 +911,6 @@ function _Session() {
   } else {
     return { object: obj, map: new Map(Object.entries(obj)) };
   }
-  return obj;
 }
 function Octal(num) {
   num = Number(num);
@@ -847,6 +938,14 @@ function Hex(num) {
     return parseInt(num, 10).toString(16);
   }
 }
+function engroup(label, code, ...args) {
+  const returnValue = [];
+  console.group(label);
+  returnValue[0] = code(...args);
+  console.groupEnd(label);
+  return returnValue[0];
+}
+console.engroup = engroup.bind(console);
 //@functions
 const customs = {
   encode,
@@ -881,6 +980,7 @@ const customs = {
   _Session,
   Octal,
   Hex,
+  engroup,
 };
 //----------------------------------------------------------//
 /**
@@ -1054,7 +1154,15 @@ const main = {
     e
   ) {
     console.error(e);
-    console.error(new Event("error", { error: e, type: "error", message: e.message, stack: e.stack, name: e.name }));
+    console.error(
+      new Event("error", {
+        error: e,
+        type: "error",
+        message: e.message,
+        stack: e.stack,
+        name: e.name,
+      }),
+    );
     process.kill(process.pid, "SIGINT");
   } finally {
     console.timeEnd("Code");
