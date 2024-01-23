@@ -1,0 +1,7 @@
+Package: nodejs-playground
+Version: 1.0
+Architecture: all
+Maintainer: Chi Zu <chizu7993@gmail.com>
+Description: A playground for NodeJS.
+Prefix: /opt
+

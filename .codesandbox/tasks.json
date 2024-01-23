@@ -2,13 +2,13 @@
   "setupTasks": [
     {
       "name": "Install Dependencies",
-      "command": "yarn install"
+      "command": "yarn run build"
     }
   ],
   "tasks": {
     "update": {
       "name": "update",
-      "command": "npm run update | les"
+      "command": "npm run update | less"
     },
     "start": {
       "name": "start",
