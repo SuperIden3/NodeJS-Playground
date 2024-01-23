@@ -1,0 +1,14 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "update",
+			"problemMatcher": [
+				"$msCompile"
+			],
+			"label": "npm: update",
+			"detail": "yarn install && sudo apt update && npm i && dpkg --install ./dpkg-deb/nodejs-playground_1.0_all.deb"
+		}
+	]
+}
