@@ -1,4 +1,4 @@
-Code: 611.836ms
+Code: 431.61ms
 [4m	Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
 [0m
 [4m	Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
@@ -12,5 +12,4 @@ Code: 611.836ms
 [1m {
   rs: ReadableStream { locked: false, state: 'closed', supportsBYOB: false },
   ws: WritableStream { locked: false, state: 'closed' }
-} 
-[0m
+} [0m
