@@ -1120,42 +1120,7 @@ const main = {
   });
   try {
     // @main
-    /** @type {Array<number>} */
-    const arr = [];
-    const a = new Promise((r) => {
-      // Do not resolve if `arr`'s length is not 25.
-      setTimeout(
-        (func) => {
-          if (arr.length === 25) func(arr);
-        },
-        0,
-        r,
-      );
-    });
-    const ws = new WritableStream({
-      write: (chunk) => {
-        arr.push(chunk);
-      },
-    });
-    const writer = ws.getWriter();
-    for (let i = 1; i <= 5; i++) {
-      for (let j = 1; j <= 5; j++) {
-        writer.write({
-          i,
-          j,
-          arhithmetic: {
-            add: i + j,
-            mul: i * j,
-            sub: i - j,
-            div: i / j,
-            mod: i % j,
-            pow: Math.pow(i, j),
-          },
-        });
-      }
-    }
-    writer.close();
-    console.log(a.then(console.log));
+    
   } catch (
     /**
      * The error that occurred.
