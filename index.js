@@ -293,13 +293,18 @@ function factorial(n) {
  * @param {string} command The shell command to execute.
  * @returns {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
  */
-const esc = async function executeShellCommand(command) {
+const esc = function executeShellCommand(command) {
   const cp = require("child_process");
   return new Promise((r, f) => {
     try {
       cp.exec(command, (err, stdout, stderr) => {
         r({
-          error: err,
+          error: (() => {
+            if(err instanceof Error)
+              return new Error(err.message);
+            if (err !== null) return new Error(err);
+            return err;
+          })(),
           stdout,
           stderr,
         });
@@ -1120,7 +1125,16 @@ const main = {
   });
   try {
     // @main
-    
+    esc("5").then(obj => {
+      if(obj.error || obj.stderr)
+        throw {error: obj.error, stderr: obj.stderr};
+      console.log(obj.stdout);
+    }).catch((errobj) => {
+      console.engroup("Errors", () => {
+        console.engroup("Error", () => console.error(errobj.error));
+        console.engroup("Actual STDERR", () => console.error(errobj.stderr))
+      });
+    });
   } catch (
     /**
      * The error that occurred.
