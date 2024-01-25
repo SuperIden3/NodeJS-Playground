@@ -181,7 +181,7 @@ class URL {
 /**
  * Reads, iterates, and yields over all the values of a ReadableStream (`readableStream`).
  * @async
- * @template T - The type of the values to read.
+ * @template T
  * @type {<T>(readableStream: ReadableStream<T>) => AsyncGenerator<T, void, void>}
  * @param {ReadableStream} readableStream The `ReadableStream` to read.
  * @yields {T} The iterated value of `readableStream`.
@@ -946,6 +946,40 @@ function engroup(label, code, ...args) {
   return returnValue[0];
 }
 console.engroup = engroup.bind(console);
+/**
+ * Wait for a `Promise`.
+ * 
+ * **Use `waitFor.call` or `waitFor.bind` for usage unless `this` is a `Promise` or `PromiseLike` object!**
+ * @version 1.0.0
+ * @template T2
+ * @this {Promise<T2> | PromiseLike<T2>}
+ * @template T3
+ * @returns {{value: (null | any), error: (null | any) | Error, gr: (resolve: (T2) => T3, reject: (T2) => T3) => T3}}
+ */
+function waitFor() {
+  const val = {};
+  if (this.constructor === Promise) {
+    this.then(value => {
+      val.value = value;
+    }).catch(err => {
+      val.error = err;
+    });
+  } else {
+    throw new Error("The first argument must be a Promise or PromiseLike object.");
+  }
+  return {
+    value: val.value === undefined ? null : val.value,
+    error: val.error === undefined ? null : val.error,
+    gr: function getResult(_then, _catch) {
+      if (this.error) {
+        _catch(this.error); return this.error;
+      }
+      return _then(this.value);
+    }
+  };
+};
+Promise.prototype.wf = waitFor;
+
 //@functions
 const customs = {
   encode,
@@ -981,6 +1015,7 @@ const customs = {
   Octal,
   Hex,
   engroup,
+  waitFor
 };
 //----------------------------------------------------------//
 /**
