@@ -267,8 +267,7 @@ class Person {
   constructor(name, age, hobbies) {
     if (age <= 0)
       throw new Error(
-        `The person cannot be${age === -1 ? " a" : ""} ${age} year${
-          age === -1 ? "" : "s"
+        `The person cannot be${age === -1 ? " a" : ""} ${age} year${age === -1 ? "" : "s"
         } old.`,
       );
     this.name = this.name.parse(name);
@@ -300,7 +299,7 @@ const esc = function executeShellCommand(command) {
       cp.exec(command, (err, stdout, stderr) => {
         r({
           error: (() => {
-            if(err instanceof Error)
+            if (err instanceof Error)
               return new Error(err.message);
             if (err !== null) return new Error(err);
             return err;
@@ -401,14 +400,13 @@ function Union(...types) {
         };
       else;
       throw new TypeError(
-        `expected a${
-          types[0].startsWith("a") ||
+        `expected a${types[0].startsWith("a") ||
           types[0].startsWith("e") ||
           types[0].startsWith("i") ||
           types[0].startsWith("o") ||
           types[0].startsWith("u")
-            ? "n"
-            : ""
+          ? "n"
+          : ""
         } ${listFormatter.format(types)}, but recieved ${typeof value}`,
       );
     },
@@ -452,8 +450,7 @@ const cet = function createEventTarget(options = {}) {
     throw new TypeError("options for function must be an object, not an array");
   else if (typeof options !== "object")
     throw new TypeError(
-      `options for function must be an object, not type of ${
-        Array.isArray(options) ? "array" : typeof options
+      `options for function must be an object, not type of ${Array.isArray(options) ? "array" : typeof options
       }`,
     );
   return et;
@@ -736,14 +733,12 @@ function Integer(num) {
   if (new.target) {
     Object.setPrototypeOf(this, Number.prototype);
     this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${
-        main.colors.Reset
+      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${main.colors.Reset
       }`;
     return Number(Math.floor(num));
   } else {
     this[Symbol.for("nodejs.util.inspect.custom")] = () =>
-      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${
-        main.colors.Reset
+      `${main.colors.yellow}[Number (Integer): ${Math.floor(num)}]${main.colors.Reset
       }`;
     return Number(Math.floor(num));
   }
@@ -1125,24 +1120,25 @@ const main = {
   });
   try {
     // @main
-    esc("5").then(obj => {
-      if(obj.error || obj.stderr)
-        throw {error: obj.error, stderr: obj.stderr};
-      console.log(obj.stdout);
-    }).catch((errobj) => {
-      console.engroup("Errors", () => {
-        console.engroup("Error", () => console.error(errobj.error));
-        console.engroup("Actual STDERR", () => console.error(errobj.stderr))
-      });
-    });
+    const a = (await main.arguments[Symbol.for("input.txt")]);
+    fetch(a).then(async val => {
+      // const reader = val.body.getReader();
+      console.log(await ((await val.blob()).text()));
+      // console.log(
+      //   Buffer.from(
+      //     (await reader.read()).value
+      //   ).toString("ascii")
+      // );
+      // reader.releaseLock();
+    })
   } catch (
-    /**
-     * The error that occurred.
-     * @type {(Error|Object)}
-     * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
-     * @extends {Error}
-     */
-    e
+  /**
+   * The error that occurred.
+   * @type {(Error|Object)}
+   * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
+   * @extends {Error}
+   */
+  e
   ) {
     console.error(e);
     console.error(
@@ -1155,7 +1151,5 @@ const main = {
       }),
     );
     process.kill(process.pid, "SIGINT");
-  } finally {
-    console.timeEnd("Code");
   }
-})();
+})().then(() => console.timeEnd("Code"));
