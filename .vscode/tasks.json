@@ -9,6 +9,15 @@
 			],
 			"label": "npm: update",
 			"detail": "yarn install && sudo apt update && npm i && dpkg --install ./dpkg-deb/nodejs-playground_1.0_all.deb"
+		},
+		{
+			"type": "npm",
+			"script": "start",
+			"problemMatcher": [
+				"$eslint-compact"
+			],
+			"label": "npm: start",
+			"detail": "printf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --trace-warnings index.js > output.log; else node --trace-warnings index.js; fi"
 		}
 	]
 }
