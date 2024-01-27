@@ -9,9 +9,9 @@
     "paginate": "read -p \"Command: \" _cmd && $_cmd > out.txt && less out.txt && rm ./out.txt",
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
     "paginate3": "less -f -N $1",
-    "build": "dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; npm run update; sudo apt-get install most; npm i node; sudo apt-get upgrade; npm run update",
-    "update": "yarn install && sudo apt update && npm i && dpkg --install ./dpkg-deb/nodejs-playground_1.0_all.deb && npm pack --pack-destination packnpm/ && echo Done!",
-    "update2": "yarn install | less && sudo apt-get update | less && npm i | less",
+    "build": "tsc --build; dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; npm run update; sudo apt-get install most; npm i node; sudo apt-get upgrade; npm run update",
+    "update": "tsc --build; yarn install && sudo apt update && npm i && dpkg --install ./dpkg-deb/nodejs-playground_1.0_all.deb && npm pack --pack-destination packnpm/ && echo Done!",
+    "update2": "tsc --build | less; yarn install | less && sudo apt-get update | less && npm i | less",
     "apkg": "read -p \"Yarn, NPM (default), Sudo, or DPKG? [y/n/s/d] \" answer && if [ ! \"$answer\" = \"d\" ] && [ ! \"$answer\" = \"D\" ]; then read -p \"Name of package: \" package; fi && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn add $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt-get install $package; elif [ \"$answer\" = \"d\" ] || [ \"$answer\" = \"D\" ]; then dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; else npm i $package; fi && echo Done!",
     "rmpkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn remove $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt remove $package; else npm uninstall $package; fi && echo Done!",
     "packup": "npm pack --pack-destination packnpm/; dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; echo Done!"
