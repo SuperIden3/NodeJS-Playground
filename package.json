@@ -8,6 +8,7 @@
     "start": "printf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --trace-warnings index.js > output.log; else node --trace-warnings index.js; fi",
     "paginate": "read -p \"Command: \" _cmd && $_cmd > out.txt && less out.txt && rm ./out.txt",
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
+    "paginate3": "less -f -N $1",
     "build": "dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; npm run update; sudo apt-get install most; npm i node; sudo apt-get upgrade; npm run update",
     "update": "yarn install && sudo apt update && npm i && dpkg --install ./dpkg-deb/nodejs-playground_1.0_all.deb && npm pack --pack-destination packnpm/ && echo Done!",
     "update2": "yarn install | less && sudo apt-get update | less && npm i | less",
