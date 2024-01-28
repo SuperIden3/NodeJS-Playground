@@ -968,6 +968,78 @@ const Interface = class {
     }
   }
 };
+/**
+ * A shortcut for creating a `ReadableStream`.
+ * @param {(controller: ReadableStreamDefaultController) => void} start The `start` function where the `controller` enqueues... stuff.
+ * @param {{pull: (controller: ReadableStreamDefaultController) => void, cancel: (reason: any) => void, autoAllocateChunkSize: number, type: string}} extraUnderlyingSourceOptions The extra underlying source options to also pass to the `ReadableStream`.
+ * @param {{highWaterMark: number, size: (chunk: any) => number}} streamStrategy The stream strategy to use.
+ * @returns {ReadableStream}
+ */
+const crs = function createReadableStream(
+  start,
+  extraUnderlyingSourceOptions = {},
+  streamStrategy = {},
+) {
+  if (start in extraUnderlyingSourceOptions)
+    throw new TypeError(
+      "`start` cannot be a key in `extraUnderlyingSourceOptions`: it is already defined in the first argument.",
+    );
+  return new ReadableStream(
+    { start, ...extraUnderlyingSourceOptions },
+    streamStrategy,
+  );
+};
+/**
+ * A shortcut for creating a `WritableStream`.
+ * @param {(chunk: any, controller: WritableStreamDefaultController) => void} write The `write` function where the `controller` writes... stuff.
+ * @param {(controller: WritableStreamDefaultController) => void} start The `start` function that starts immediately once the `WritableStream` is created.
+ * @param {{close: (controller: WritableStreamDefaultController) => void, abort: (reason: any) => void}?} extraUnderlyingSinkOptions The extra underlying sink options to also pass to the `WritableStream`.
+ * @param {{highWaterMark: number, size: (chunk: any) => number}?} streamStrategy The stream strategy to use.
+ * @returns {WritableStream}
+ */
+const cws = function createWritableStream(
+  write,
+  start,
+  extraUnderlyingSinkOptions = {},
+  streamStrategy = {},
+) {
+  if (
+    start in extraUnderlyingSinkOptions ||
+    write in extraUnderlyingSinkOptions
+  )
+    throw new TypeError(
+      "`start` and `write` cannot be keys in `extraUnderlyingSinkOptions`: they are already defined in the first two argument.",
+    );
+  return new WritableStream(
+    { start, write, ...extraUnderlyingSinkOptions },
+    streamStrategy,
+  );
+};
+/**
+ * A shortcut for creating a `TransformStream`.
+ * @param {(chunk: any, controller: TransformStreamDefaultController) => void} transform The `transform` function that is called every time the `WritableStream` part of the `TransformStream` is written to.
+ * @param {(controller: TransformStreamDefaultController) => void} start The `start` function that starts immediately once the `TransformStream` is created.
+ * @param {{flush: (controller: TransformStreamDefaultController) => void}?} extraTransformerOptions The extra transformer options to also pass to the `TransformStream`.
+ * @param {{highWaterMark: number, size: (chunk: any) => number}?} writableStrategy The strategy for the `WritableStream` side to use.
+ * @param {{highWaterMark: number, size: (chunk: any) => number}?} readableStrategy The strategy for the `ReadableStream` side to use.
+ */
+const cts = function createTransformStream(
+  transform,
+  start,
+  extraTransformerOptions = {},
+  writableStrategy = {},
+  readableStrategy = {},
+) {
+  if (start in extraTransformerOptions || transform in extraTransformerOptions)
+    throw new TypeError(
+      "`start` and `transform` cannot be keys in `extraUnderlyingSinkOptions`: they are already defined in the first two argument.",
+    );
+  return new TransformStream(
+    { start, transform, ...extraTransformerOptions },
+    writableStrategy,
+    readableStrategy,
+  );
+};
 
 //@functions
 const customs = {
@@ -1010,6 +1082,9 @@ const customs = {
   AsyncGeneratorFunction: _AsyncGeneratorFunction,
   Function,
   Interface,
+  crs,
+  cws,
+  cts,
 };
 //----------------------------------------------------------//
 /**
