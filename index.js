@@ -942,50 +942,32 @@ function Hex(num) {
     return parseInt(num, 10).toString(16);
   }
 }
-function engroup(label, code, ...args) {
+const engroup = function engroup(label, code, ...args) {
   const returnValue = [];
   console.group(label);
   returnValue[0] = code(...args);
   console.groupEnd(label);
   return returnValue[0];
-}
+};
 console.engroup = engroup.bind(console);
 /**
- * Wait for a `Promise`.
- *
- * **Use `waitFor.call` or `waitFor.bind` for usage unless `this` is a `Promise` or `PromiseLike` object!**
- * @version 1.0.0
- * @template T2
- * @this {Promise<T2> | PromiseLike<T2>}
- * @template T3
- * @returns {{value: (null | any), error: (null | any) | Error, gr: (resolve: (T2) => T3, reject: (T2) => T3) => T3}}
+ * The `AsyncFunction` object.
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
  */
-function waitFor() {
-  const val = {};
-  if (this.constructor === Promise) {
-    this.then((value) => {
-      val.value = value;
-    }).catch((err) => {
-      val.error = err;
-    });
-  } else {
-    throw new Error(
-      "The first argument must be a Promise or PromiseLike object.",
-    );
+const _AsyncFunction = Object.getPrototypeOf(async function () {}).constructor;
+const _GeneratorFunction = Object.getPrototypeOf(function* () {}).constructor;
+const _AsyncGeneratorFunction = Object.getPrototypeOf(
+  async function* () {},
+).constructor;
+const Interface = class {
+  constructor(actuallyConstructable = false) {
+    if (!actuallyConstructable) {
+      throw new TypeError(
+        `This expression is not constructable.\n\rType '${this.constructor.name}' has no construct signatures.`,
+      );
+    }
   }
-  return {
-    value: val.value === undefined ? null : val.value,
-    error: val.error === undefined ? null : val.error,
-    gr: function getResult(_then, _catch) {
-      if (this.error) {
-        _catch(this.error);
-        return this.error;
-      }
-      return _then(this.value);
-    },
-  };
-}
-Promise.prototype.wf = waitFor;
+};
 
 //@functions
 const customs = {
@@ -1023,6 +1005,11 @@ const customs = {
   Hex,
   engroup,
   waitFor,
+  AsyncFunction: _AsyncFunction,
+  GeneratorFunction: _GeneratorFunction,
+  AsyncGeneratorFunction: _AsyncGeneratorFunction,
+  Function,
+  Interface,
 };
 //----------------------------------------------------------//
 /**
@@ -1124,6 +1111,7 @@ const main = {
     },
   },
 };
+
 /**
  * Main function for code.
  * @typedef {...any} Arguments Arguments of a function.
@@ -1131,7 +1119,7 @@ const main = {
  * @param {Arguments} args The arguments for the function.
  * @returns {IIAFE}
  */
-(async function Main() {
+async function Main() {
   "use strict";
   Object.setPrototypeOf(main, Object.prototype);
   Object.defineProperties(process, {
@@ -1183,4 +1171,7 @@ const main = {
     );
     process.kill(process.pid, "SIGINT");
   }
-})().then(() => console.timeEnd("Code"));
+}
+Main().finally(() => {
+  console.timeEnd("Code");
+});
