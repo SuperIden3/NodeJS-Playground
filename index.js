@@ -584,7 +584,7 @@ Object.prototype.prettify = prettify;
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
  * @return {Map | Set} The mappified/settified object.
- * @version 2.0.0
+ * @version 2.1.0
  * @example
  * ```js
  * const obj = {
@@ -616,17 +616,19 @@ function mappify() {
     return new Set(this);
   } else {
     return new Map(
-      Object.entries(this).map(([key, value]) => {
-        if (typeof value === "object" && !!value) {
-          return [key, mappify.call(value)];
+      Object.entries(this).map(([key, _value]) => {
+        if (typeof _value === "object" && !!_value) {
+          return [key, mappify.call(_value)];
         }
         return [
           key,
-          typeof value === "object" && !Array.isArray(value) && !!value
-            ? new Map(Object.entries(value))
-            : Array.isArray(value)
-              ? new Set(value)
-              : value,
+          typeof _value !== "function" &&
+          typeof _value !== "undefined" &&
+          _value !== null
+            ? new Map(Object.entries(_value))
+            : Array.isArray(_value)
+              ? new Set(_value)
+              : _value,
         ];
       }),
     );
@@ -1112,8 +1114,8 @@ const main = {
   file: () => process.argv[1],
   interpreter: () => process.argv[0],
   [Symbol.toStringTag]: "Main",
-  [Symbol.for("nodejs.util.inspect.custom")]: () => {
-    return `${main.colors.Cyan}${main[Symbol.toStringTag]} { arguments: { argv: [ ${main.arguments.argv().join(", ")} ], length: ${main.arguments.length()}, "input.txt": [ ${main.arguments[Symbol.for("input.txt")]} ] }, env: ${main.env()}, file: ${main.file()}, interpreter: ${main.interpreter()} }${main.colors.reset}`;
+  [Symbol.for("nodejs.util.inspect.custom")]: async () => {
+    return `${main.colors.Cyan}${main[Symbol.toStringTag]} { arguments: { argv: [ ${main.arguments.argv().join(", ")} ], length: ${main.arguments.length()}, "input.txt": [ ${await main.arguments[Symbol.for("input.txt")]} ] }, env: ${main.env()}, file: ${main.file()}, interpreter: ${main.interpreter()} }${main.colors.reset}`;
   },
   [Symbol.for("map")]: () => {
     const val = mappify.call(this);
