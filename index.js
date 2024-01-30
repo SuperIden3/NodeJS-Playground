@@ -1,7 +1,7 @@
 console.time("Code");
-//------------------------------------------------------------//
+// ------------------------------------------------------------//
 
-//@imports
+// @imports
 const pickRandom = require("./pickRandom.js");
 const range = require("./range.js");
 
@@ -19,7 +19,7 @@ const DOTENV = require("dotenv");
 DOTENV.config();
 const CRYPTO = require("crypto");
 const _JSDOM = require("jsdom");
-/*const rl = require("readline").createInterface({
+/* const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
 });*/
@@ -40,25 +40,25 @@ const imports = {
   readline: require("readline"),
   jsdom: _JSDOM,
 };
-//------------------------------------------------------------//
+// ------------------------------------------------------------//
 /**
  * Decode a buffered array.
  * @param {ArrayBuffer} bufferedArray The buffered array to decode.
  * @param {string} encoding The encoding format of the buffered array to decode.
- * @returns {string} The decoded buffered array.
+ * @return {string} The decoded buffered array.
  */
 function decode(bufferedArray, encoding = "utf-8") {
-  let decoder = new TextDecoder(encoding);
+  const decoder = new TextDecoder(encoding);
   return decoder.decode(bufferedArray);
 }
 /**
  * Encode any string into the encoding format `encoding`.
  * @param {string} str The string to encode.
  * @param {Uint8Array | Buffer} mode Either makes the function return a `Uint8Array` or a `Buffer`.
- * @returns {Uint8Array | Buffer} The encoded string in `utf-8` format.
+ * @return {Uint8Array | Buffer} The encoded string in `utf-8` format.
  */
 function encode(str) {
-  let encoder = new TextEncoder();
+  const encoder = new TextEncoder();
   return encoder.encode(str);
 }
 /**
@@ -68,20 +68,21 @@ function encode(str) {
  */
 function* enumerate(obj) {
   if (Array.isArray(obj)) {
-    for (let index in obj)
+    for (const index in obj) {
       yield {
         index: index,
         value: obj[index],
       };
+    }
   } else {
-    let keys = Object.keys(obj);
-    let values = Object.values(obj);
+    const keys = Object.keys(obj);
+    const values = Object.values(obj);
     /**
      * @type {Array<{key: string, index: number, value: any}>}
      */
-    let vals = [];
+    const vals = [];
     for (let i = 0; i < keys.length; i++) {
-      let x = {
+      const x = {
         key: keys[i],
         index: parseInt(i),
         value: values[i],
@@ -135,13 +136,14 @@ class LineReader {
         value: function* iterator() {
           const keys = Object.keys(o);
           const values = Object.values(o);
-          for (const i in keys)
+          for (const i in keys) {
             yield {
               key: keys[i],
               index: i,
               count: i + 1,
               value: values[i],
             };
+          }
         },
       },
     });
@@ -150,7 +152,7 @@ class LineReader {
 /**
  * Initialize a new URL object.
  * @param {string} _url The URL.
- * @returns {URL}
+ * @return {URL}
  * @example const url = new URL("https://example.com");
  * console.log(url); // URL { url: 'https://example.com' }
  * url.open().then(console.log).catch(console.error); // Opens the URL in a new tab.
@@ -208,29 +210,31 @@ const rsra = async function* readableStreamReadAll(readableStream) {
   reader.releaseLock();
   return readValues;
 };
-/**@typedef {...number} NumberArray */
+/** @typedef {...number} NumberArray */
 /**
  * Find the maximum value in an array.
  * @typedef {number} MaxNumber A maximum value in an array.
  * @param {NumberArray} values The numbers to iterate over.
- * @returns {MaxNumber} The maximum value from `values`.
+ * @return {MaxNumber} The maximum value from `values`.
  */
 function max(...values) {
   let maximum = values[0];
-  for (const num of values)
+  for (const num of values) {
     if (ZOD.number().parse(num) > maximum) maximum = num;
+  }
   return maximum;
 }
 /**
  * Find the minimum value in an array.
  * @typedef {number} MinNumber A minimum value in an array.
  * @param {NumberArray} values The numbers to iterate over.
- * @returns {MinNumber} The minimum value from `values`.
+ * @return {MinNumber} The minimum value from `values`.
  */
 function min(...values) {
   let minimum = values[0];
-  for (const num of values)
+  for (const num of values) {
     if (ZOD.number().parse(num) < minimum) minimum = num;
+  }
   return minimum;
 }
 /**
@@ -238,7 +242,7 @@ function min(...values) {
  * @param {string} name The name for the person.
  * @param {number} age The age for the person.
  * @param {string[]} hobbies The hobbies for the person.
- * @returns {Person} The `Person`.
+ * @return {Person} The `Person`.
  * @example const person = new Person("John", 25, ["hiking", "reading"]);
  * console.log(person); // Person { name: "John", age: 25, hobbies: ["hiking", "reading"] }
  */
@@ -265,12 +269,13 @@ class Person {
     description: "These are the hobbies for the person.",
   }).or(ZOD.object(new Set()));
   constructor(name, age, hobbies) {
-    if (age <= 0)
+    if (age <= 0) {
       throw new Error(
         `The person cannot be${age === -1 ? " a" : ""} ${age} year${
           age === -1 ? "" : "s"
         } old.`,
       );
+    }
     this.name = this.name.parse(name);
     this.age = this.age.parse(age);
     this.hobbies = this.hobbies.parse(hobbies);
@@ -281,7 +286,7 @@ class Person {
  * @typedef {number} FactorialNumberArgument
  * @param {FactorialNumberArgument} n The number to calculate its factorial.
  * @typedef {number} FactorialResult
- * @returns {FactorialResult}
+ * @return {FactorialResult}
  */
 function factorial(n) {
   ZOD.number().or(ZOD.bigint()).parse(n);
@@ -291,7 +296,7 @@ function factorial(n) {
 /**
  * Execute a shell command.
  * @param {string} command The shell command to execute.
- * @returns {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
+ * @return {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
  */
 const esc = function executeShellCommand(command) {
   const cp = require("child_process");
@@ -321,8 +326,9 @@ const convertTo = {
    */
   binary(str) {
     const _binary = new ArrayBuffer(str.length);
-    for (let i = 0; i < str.length; i++)
+    for (let i = 0; i < str.length; i++) {
       _binary.push(parseInt(str[i].charCodeAt(0).toString(2)));
+    }
     return _binary;
   },
   /**
@@ -330,12 +336,13 @@ const convertTo = {
    * @typedef {string} StringArgumentHexadecimal
    * @param {StringArgumentHexadecimal} str
    * @typedef {Buffer} HexadecimalNumbers
-   * @returns {HexadecimalNumbers}
+   * @return {HexadecimalNumbers}
    */
   hexadecimal(str) {
     const _hexadecimal = [];
-    for (let i = 0; i < str.length; i++)
+    for (let i = 0; i < str.length; i++) {
       _hexadecimal[i] = str[i].charCodeAt(0).toString(16);
+    }
     return Buffer.from(str);
   },
   /**
@@ -343,12 +350,13 @@ const convertTo = {
    * @typedef {string} StringArgumentOctal
    * @param {StringArgumentOctal} str
    * @typedef {ArrayBuffer} OctalNumbers
-   * @returns {OctalNumbers}
+   * @return {OctalNumbers}
    */
   octal(str) {
     const _octal = new ArrayBuffer(str.length);
-    for (let i = 0; i < str.length; i++)
+    for (let i = 0; i < str.length; i++) {
       _octal[i] = parseInt(str[i].charCodeAt(0).toString(8));
+    }
     return _octal;
   },
   /**
@@ -358,12 +366,13 @@ const convertTo = {
    * @param {StringArgumentCustomBase} str
    * @param {BaseNumberCustomBase} base
    * @typedef {ArrayBuffer} CustomBaseNumbers
-   * @returns {CustomBaseNumbers}
+   * @return {CustomBaseNumbers}
    */
   cb: function customBase(str, base = 10) {
     const nums = new ArrayBuffer(str.length);
-    for (let i = 0; i < str.length; i++)
+    for (let i = 0; i < str.length; i++) {
       nums[i] = str[i].charCodeAt(0).toString(parseInt(base));
+    }
     return nums;
   },
 };
@@ -381,11 +390,12 @@ function Union(...types) {
         type: "disjunction",
       });
       const arr = new Set();
-      for (const i of this.types)
+      for (const i of this.types) {
         if (typeof value === i) arr.add(true);
         else;
+      }
       arr.add(false);
-      if (arr.has(true))
+      if (arr.has(true)) {
         return {
           value,
           valueType: typeof value,
@@ -398,7 +408,7 @@ function Union(...types) {
           expectedTypes: types,
           formatter: listFormatter,
         };
-      else;
+      } else;
       throw new TypeError(
         `expected a${
           types[0].startsWith("a") ||
@@ -416,7 +426,7 @@ function Union(...types) {
 /**
  * Create a trace message.
  * @param {string} message The message.
- * @returns {Error} The trace message.
+ * @return {Error} The trace message.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  * ```js
  * const trace = Trace("this is a trace message");
@@ -440,27 +450,28 @@ function Trace(message) {
 /**
  * Create an event target.
  * @param {object} options The options.
- * @returns {EventTarget} The event target.
+ * @return {EventTarget} The event target.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget
  */
 const cet = function createEventTarget(options = {}) {
   const et = new EventTarget();
-  if (typeof options === "object" && !Array.isArray(options))
+  if (typeof options === "object" && !Array.isArray(options)) {
     Object.assign(et, options);
-  else if (Array.isArray(options))
+  } else if (Array.isArray(options)) {
     throw new TypeError("options for function must be an object, not an array");
-  else if (typeof options !== "object")
+  } else if (typeof options !== "object") {
     throw new TypeError(
       `options for function must be an object, not type of ${
         Array.isArray(options) ? "array" : typeof options
       }`,
     );
+  }
   return et;
 };
 /**
  * Calculate the perimeter of a rectangle.
  * @param {...number} nums The length and width of the rectangle.
- * @returns {number} The perimeter of the rectangle.
+ * @return {number} The perimeter of the rectangle.
  */
 function perimeter(...nums) {
   const arr = [];
@@ -474,7 +485,7 @@ function perimeter(...nums) {
  * @typedef {(string[]|object)} FormatStringArguments
  * @param {FormatStringArguments} args The values to replace the indexes.
  * @typedef {string} FormattedString
- * @returns {FormattedString} The formatted string.
+ * @return {FormattedString} The formatted string.
  * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
  */
 const format = function format(args) {
@@ -497,7 +508,7 @@ const Messager = Object.freeze(
     /**
      * Send a message.
      * @param {Message} str The message to send.
-     * @returns {Message} The message that was sent.
+     * @return {Message} The message that was sent.
      * @throws {TypeError} If `str` is not a string.
      */
     message(str) {
@@ -526,7 +537,7 @@ const Messager = Object.freeze(
  * Format an array using `Intl.ListFormat`.
  * @param {("conjunction" | "disjunction" | "unit")} type The type of grouping.
  * @param {("long" | "short" | "narrow")} style The style of the grouping.
- * @returns {string} The formatted array.
+ * @return {string} The formatted array.
  */
 Array.prototype.format = function format(
   language = "en-US",
@@ -572,7 +583,7 @@ Object.prototype.prettify = prettify;
 /**
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
- * @returns {Map | Set} The mappified/settified object.
+ * @return {Map | Set} The mappified/settified object.
  * @version 2.0.0
  * @example
  * ```js
@@ -606,8 +617,9 @@ function mappify() {
   } else {
     return new Map(
       Object.entries(this).map(([key, value]) => {
-        if (typeof value === "object" && !!value)
+        if (typeof value === "object" && !!value) {
           return [key, mappify.call(value)];
+        }
         return [
           key,
           typeof value === "object" && !Array.isArray(value) && !!value
@@ -621,40 +633,6 @@ function mappify() {
   }
 }
 Object.prototype.mappify = mappify;
-/**
- * *Unmappify* or *Unsettify* an object.
- * Turns `obj` and everything inside of it from a `Map` or `Set` back into an `object` or an `array`.
- * @this {Map | Set}
- * @returns {object | any[]} The unmappified/unsettified object.
- * @version 1.0.0
- * @example
- * ```js
- * const obj = new Map([
- *   ['a', 1],
- *   ['b', 2],
- *   ['c', new Map([
- *     ['d', 3],
- *     ['e', 4],
- * ])],
- *   ['f', new Set([5, 6])],
- * ]);
- * console.log(obj.unmappify()); // { a: 1, b: 2, c: { d: 3, e: 4 }, f: [5, 6] }
- * ```
- */
-function unmappify() {
-  for (const [key, value] of this) {
-    if (value instanceof Map) {
-      this.set(key, Object.fromEntries(value));
-    } else if (value instanceof Set) {
-      this.set(key, Array.from(value));
-    } else {
-      this.set(key, value);
-    }
-  }
-  return Object.fromEntries(this);
-}
-Map.prototype.unmappify = unmappify;
-Set.prototype.unmappify = unmappify;
 const dn = function doNothing() {
   return this;
 };
@@ -731,7 +709,7 @@ const cipher = {
  * The `Integer` function.
  * @param {number} num The number to be converted to an `Integer`.
  * @typedef {number|object} Integer
- * @returns {Integer}
+ * @return {Integer}
  * @version 1.0.0
  */
 function Integer(num) {
@@ -755,7 +733,7 @@ function Integer(num) {
  * The `Float` function.
  * @param {number} num The number to be converted to an `Float`.
  * @typedef {number|object} Float
- * @returns {Float}
+ * @return {Float}
  * @version 1.0.0
  */
 function Float(num) {
@@ -776,7 +754,7 @@ function Float(num) {
  * The `Double` function.
  * @param {number} num The number to be converted to an `Double`.
  * @typedef {number|object} Double
- * @returns {Double}
+ * @return {Double}
  * @version 1.0.0
  */
 function Double(num) {
@@ -795,7 +773,7 @@ function Double(num) {
 }
 /**
  * The `getCustomInspect` function.
- * @returns {symbol} The symbol for custom inspect (`Symbol.for("nodejs.util.inspect.custom")`).
+ * @return {symbol} The symbol for custom inspect (`Symbol.for("nodejs.util.inspect.custom")`).
  * @version 1.0.0
  */
 const gci = function getCustomInspect() {
@@ -803,7 +781,7 @@ const gci = function getCustomInspect() {
 };
 /**
  * The `_Session` object.
- * @returns {object} The `_Session` object.
+ * @return {object} The `_Session` object.
  * @version 1.0.0
  */
 function _Session() {
@@ -813,17 +791,17 @@ function _Session() {
   let i = 0;
   /**
    * Checks if the `_Session` is **closed**.
-   * @returns {Promise<boolean>}
+   * @return {Promise<boolean>}
    */
   obj.closed = () => new Promise((r) => (closed[i] ? r(true) : undefined));
   /**
    * Checks if the `_Session` is **opened**.
-   * @returns {Promise<boolean>}
+   * @return {Promise<boolean>}
    */
   obj.opened = () => new Promise((r) => (open[i] ? r(true) : undefined));
   /**
    * Get the `_Session` info.
-   * @returns {{object: {opened: Promise<boolean>, closed: Promise<boolean>}, map: Map<string, Promise<boolean>>}}
+   * @return {{object: {opened: Promise<boolean>, closed: Promise<boolean>}, map: Map<string, Promise<boolean>>}}
    */
   obj.getInfo = () => ({
     object: { opened: obj.opened(), closed: obj.closed() },
@@ -834,7 +812,7 @@ function _Session() {
   const et = new EventTarget();
   /**
    * Closes the `_Session`.
-   * @returns {boolean} Shows if the function is successful.
+   * @return {boolean} Shows if the function is successful.
    */
   obj.close = () => {
     i = i + 1;
@@ -861,7 +839,7 @@ function _Session() {
   };
   /**
    * Opens the `_Session`.
-   * @returns {boolean} Shows if the function is successful.
+   * @return {boolean} Shows if the function is successful.
    */
   obj.open = () => {
     i = i + 1;
@@ -890,21 +868,21 @@ function _Session() {
    * Adds an event listener.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @returns {void}
+   * @return {void}
    */
   obj.on = (name, callback) => et.addEventListener(name, callback);
   /**
    * Removes an event listener.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @returns {void}
+   * @return {void}
    */
   obj.off = (name, callback) => et.removeEventListener(name, callback);
   /**
    * Adds an event listener once.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @returns {void}
+   * @return {void}
    */
   obj.once = (name, callback) => {
     function handler(event) {
@@ -984,10 +962,11 @@ const crs = function createReadableStream(
   extraUnderlyingSourceOptions = {},
   streamStrategy = {},
 ) {
-  if (start in extraUnderlyingSourceOptions)
+  if (start in extraUnderlyingSourceOptions) {
     throw new TypeError(
       "`start` cannot be a key in `extraUnderlyingSourceOptions`: it is already defined in the first argument.",
     );
+  }
   return new ReadableStream(
     { start, ...extraUnderlyingSourceOptions },
     streamStrategy,
@@ -1010,10 +989,11 @@ const cws = function createWritableStream(
   if (
     start in extraUnderlyingSinkOptions ||
     write in extraUnderlyingSinkOptions
-  )
+  ) {
     throw new TypeError(
       "`start` and `write` cannot be keys in `extraUnderlyingSinkOptions`: they are already defined in the first two argument.",
     );
+  }
   return new WritableStream(
     { start, write, ...extraUnderlyingSinkOptions },
     streamStrategy,
@@ -1034,10 +1014,14 @@ const cts = function createTransformStream(
   writableStrategy = {},
   readableStrategy = {},
 ) {
-  if (start in extraTransformerOptions || transform in extraTransformerOptions)
+  if (
+    start in extraTransformerOptions ||
+    transform in extraTransformerOptions
+  ) {
     throw new TypeError(
       "`start` and `transform` cannot be keys in `extraUnderlyingSinkOptions`: they are already defined in the first two argument.",
     );
+  }
   return new TransformStream(
     { start, transform, ...extraTransformerOptions },
     writableStrategy,
@@ -1045,7 +1029,7 @@ const cts = function createTransformStream(
   );
 };
 
-//@functions
+// @functions
 const customs = {
   encode,
   decode,
@@ -1069,7 +1053,6 @@ const customs = {
   toFile,
   prettify,
   mappify,
-  unmappify,
   dn,
   cipher,
   Integer,
@@ -1089,7 +1072,7 @@ const customs = {
   cws,
   cts,
 };
-//----------------------------------------------------------//
+// ----------------------------------------------------------//
 /**
  * The object that contrains the main info for the program.
  * @type {({arguments: {argv: () =.>string[], length: () => number, [Symbol.for("input.txt")]: Promise<string[]>}, env: () => NodeJS.ProcessEnv, file:  () => string, interpreter: () => string, [Symbol.for("nodejs.util.inspect.custom")]: () => string, [Symbol.for("map")]: () => Map<string, string>, colors: { red: string green: string yellow: string blue: string magenta: string cyan: string white: string black: string reset: string bold: string underline: string blink: string reverse: string hidden: string Blue: string Reset: string Black: string Red: string Green: string Yellow: string Magenta: string Cyan: string White: string Gray: string "Bright Red": string "Bright Green": string "Bright Yellow": string "Bright Magenta": string "Bright Cyan": string "Bright White": string "Bright Black": string "Bright Blue": string "Bright Cyan": string "Bright Magenta": string "Bright White": string "Bright Yellow": string "Bright Gray": string "Dark Gray": string, [Symbol.for("nodejs.util.inspect.custom")]: () => string}})}
@@ -1117,7 +1100,7 @@ const main = {
       /**
        * @param {NodeJS.ErrnoException} err
        * @param {string} data
-       * @returns {string[]}
+       * @return {string[]}
        */
       (err, data) => {
         if (err) throw err;
