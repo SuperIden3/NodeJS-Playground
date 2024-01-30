@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "printf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --trace-warnings index.js > output.log; else node --trace-warnings index.js; fi",
+    "start": "printf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --no-warnings index.js > output.log; else node --no-warnings index.js; fi",
     "paginate": "read -p \"Command: \" _cmd && $_cmd > out.txt && less out.txt && rm ./out.txt",
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
     "paginate3": "less -f -N $1",
