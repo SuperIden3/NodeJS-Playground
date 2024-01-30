@@ -573,7 +573,7 @@ Object.prototype.prettify = prettify;
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
  * @returns {Map | Set} The mappified/settified object.
- * @version 1.0.0
+ * @version 2.0.0
  * @example
  * ```js
  * const obj = {
@@ -591,28 +591,32 @@ Object.prototype.prettify = prettify;
  */
 function mappify() {
   if (Array.isArray(this)) {
-    // turn `obj` into a Set, and if there are other arrays in `obj`, turn them into Sets. If there are objects in `obj`, turn them into Maps.
-    return new Set(
-      this.flatMap((value) => {
-        if (Array.isArray(value)) {
-          return new Set(value);
-        } else if (typeof value === "object") {
-          return new Map(Object.entries(value));
-        } else {
-          return value;
-        }
-      }),
-    );
-  } else {
-    return new Map(
-      Object.entries(this).map(([key, value]) => [
-        key,
+    for (const [key, value] of Object.entries(this)) {
+      if (Array.isArray(value) && !!value) {
+        this[key] = mappify.call(value);
+      }
+      this[key] =
         typeof value === "object" && !Array.isArray(value) && !!value
           ? new Map(Object.entries(value))
           : Array.isArray(value)
             ? new Set(value)
-            : value,
-      ]),
+            : value;
+    }
+    return new Set(this);
+  } else {
+    return new Map(
+      Object.entries(this).map(([key, value]) => {
+        if (typeof value === "object" && !!value)
+          return [key, mappify.call(value)];
+        return [
+          key,
+          typeof value === "object" && !Array.isArray(value) && !!value
+            ? new Map(Object.entries(value))
+            : Array.isArray(value)
+              ? new Set(value)
+              : value,
+        ];
+      }),
     );
   }
 }
@@ -1076,7 +1080,6 @@ const customs = {
   Octal,
   Hex,
   engroup,
-  waitFor,
   AsyncFunction: _AsyncFunction,
   GeneratorFunction: _GeneratorFunction,
   AsyncGeneratorFunction: _AsyncGeneratorFunction,
