@@ -45,7 +45,7 @@ const imports = {
  * Decode a buffered array.
  * @param {ArrayBuffer} bufferedArray The buffered array to decode.
  * @param {string} encoding The encoding format of the buffered array to decode.
- * @return {string} The decoded buffered array.
+ * @returns {string} The decoded buffered array.
  */
 function decode(bufferedArray, encoding = "utf-8") {
   const decoder = new TextDecoder(encoding);
@@ -55,7 +55,7 @@ function decode(bufferedArray, encoding = "utf-8") {
  * Encode any string into the encoding format `encoding`.
  * @param {string} str The string to encode.
  * @param {Uint8Array | Buffer} mode Either makes the function return a `Uint8Array` or a `Buffer`.
- * @return {Uint8Array | Buffer} The encoded string in `utf-8` format.
+ * @returns {Uint8Array | Buffer} The encoded string in `utf-8` format.
  */
 function encode(str) {
   const encoder = new TextEncoder();
@@ -152,7 +152,7 @@ class LineReader {
 /**
  * Initialize a new URL object.
  * @param {string} _url The URL.
- * @return {URL}
+ * @returns {URL}
  * @example const url = new URL("https://example.com");
  * console.log(url); // URL { url: 'https://example.com' }
  * url.open().then(console.log).catch(console.error); // Opens the URL in a new tab.
@@ -215,7 +215,7 @@ const rsra = async function* readableStreamReadAll(readableStream) {
  * Find the maximum value in an array.
  * @typedef {number} MaxNumber A maximum value in an array.
  * @param {NumberArray} values The numbers to iterate over.
- * @return {MaxNumber} The maximum value from `values`.
+ * @returns {MaxNumber} The maximum value from `values`.
  */
 function max(...values) {
   let maximum = values[0];
@@ -228,7 +228,7 @@ function max(...values) {
  * Find the minimum value in an array.
  * @typedef {number} MinNumber A minimum value in an array.
  * @param {NumberArray} values The numbers to iterate over.
- * @return {MinNumber} The minimum value from `values`.
+ * @returns {MinNumber} The minimum value from `values`.
  */
 function min(...values) {
   let minimum = values[0];
@@ -242,7 +242,7 @@ function min(...values) {
  * @param {string} name The name for the person.
  * @param {number} age The age for the person.
  * @param {string[]} hobbies The hobbies for the person.
- * @return {Person} The `Person`.
+ * @returns {Person} The `Person`.
  * @example const person = new Person("John", 25, ["hiking", "reading"]);
  * console.log(person); // Person { name: "John", age: 25, hobbies: ["hiking", "reading"] }
  */
@@ -286,7 +286,7 @@ class Person {
  * @typedef {number} FactorialNumberArgument
  * @param {FactorialNumberArgument} n The number to calculate its factorial.
  * @typedef {number} FactorialResult
- * @return {FactorialResult}
+ * @returns {FactorialResult}
  */
 function factorial(n) {
   ZOD.number().or(ZOD.bigint()).parse(n);
@@ -296,7 +296,7 @@ function factorial(n) {
 /**
  * Execute a shell command.
  * @param {string} command The shell command to execute.
- * @return {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
+ * @returns {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
  */
 const esc = function executeShellCommand(command) {
   const cp = require("child_process");
@@ -336,7 +336,7 @@ const convertTo = {
    * @typedef {string} StringArgumentHexadecimal
    * @param {StringArgumentHexadecimal} str
    * @typedef {Buffer} HexadecimalNumbers
-   * @return {HexadecimalNumbers}
+   * @returns {HexadecimalNumbers}
    */
   hexadecimal(str) {
     const _hexadecimal = [];
@@ -350,7 +350,7 @@ const convertTo = {
    * @typedef {string} StringArgumentOctal
    * @param {StringArgumentOctal} str
    * @typedef {ArrayBuffer} OctalNumbers
-   * @return {OctalNumbers}
+   * @returns {OctalNumbers}
    */
   octal(str) {
     const _octal = new ArrayBuffer(str.length);
@@ -366,7 +366,7 @@ const convertTo = {
    * @param {StringArgumentCustomBase} str
    * @param {BaseNumberCustomBase} base
    * @typedef {ArrayBuffer} CustomBaseNumbers
-   * @return {CustomBaseNumbers}
+   * @returns {CustomBaseNumbers}
    */
   cb: function customBase(str, base = 10) {
     const nums = new ArrayBuffer(str.length);
@@ -426,7 +426,7 @@ function Union(...types) {
 /**
  * Create a trace message.
  * @param {string} message The message.
- * @return {Error} The trace message.
+ * @returns {Error} The trace message.
  * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Error
  * ```js
  * const trace = Trace("this is a trace message");
@@ -450,7 +450,7 @@ function Trace(message) {
 /**
  * Create an event target.
  * @param {object} options The options.
- * @return {EventTarget} The event target.
+ * @returns {EventTarget} The event target.
  * @see https://developer.mozilla.org/en-US/docs/Web/API/EventTarget
  */
 const cet = function createEventTarget(options = {}) {
@@ -471,7 +471,7 @@ const cet = function createEventTarget(options = {}) {
 /**
  * Calculate the perimeter of a rectangle.
  * @param {...number} nums The length and width of the rectangle.
- * @return {number} The perimeter of the rectangle.
+ * @returns {number} The perimeter of the rectangle.
  */
 function perimeter(...nums) {
   const arr = [];
@@ -485,7 +485,7 @@ function perimeter(...nums) {
  * @typedef {(string[]|object)} FormatStringArguments
  * @param {FormatStringArguments} args The values to replace the indexes.
  * @typedef {string} FormattedString
- * @return {FormattedString} The formatted string.
+ * @returns {FormattedString} The formatted string.
  * @example `console.log("Hello, {0}!".format("World"));` prints `Hello, World!`.
  */
 const format = function format(args) {
@@ -508,7 +508,7 @@ const Messager = Object.freeze(
     /**
      * Send a message.
      * @param {Message} str The message to send.
-     * @return {Message} The message that was sent.
+     * @returns {Message} The message that was sent.
      * @throws {TypeError} If `str` is not a string.
      */
     message(str) {
@@ -537,7 +537,7 @@ const Messager = Object.freeze(
  * Format an array using `Intl.ListFormat`.
  * @param {("conjunction" | "disjunction" | "unit")} type The type of grouping.
  * @param {("long" | "short" | "narrow")} style The style of the grouping.
- * @return {string} The formatted array.
+ * @returns {string} The formatted array.
  */
 Array.prototype.format = function format(
   language = "en-US",
@@ -583,7 +583,7 @@ Object.prototype.prettify = prettify;
 /**
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
- * @return {Map<(string | symbol | number), any> | Set<any>} The mappified/settified object.
+ * @returns {Map<(string | symbol | number), any> | Set<any>} The mappified/settified object.
  * @version 2.1.1
  * @example
  * ```js
@@ -711,7 +711,7 @@ const cipher = {
  * The `Integer` function.
  * @param {number} num The number to be converted to an `Integer`.
  * @typedef {number|object} Integer
- * @return {Integer}
+ * @returns {Integer}
  * @version 1.0.0
  */
 function Integer(num) {
@@ -735,7 +735,7 @@ function Integer(num) {
  * The `Float` function.
  * @param {number} num The number to be converted to an `Float`.
  * @typedef {number|object} Float
- * @return {Float}
+ * @returns {Float}
  * @version 1.0.0
  */
 function Float(num) {
@@ -756,7 +756,7 @@ function Float(num) {
  * The `Double` function.
  * @param {number} num The number to be converted to an `Double`.
  * @typedef {number|object} Double
- * @return {Double}
+ * @returns {Double}
  * @version 1.0.0
  */
 function Double(num) {
@@ -775,7 +775,7 @@ function Double(num) {
 }
 /**
  * The `getCustomInspect` function.
- * @return {symbol} The symbol for custom inspect (`Symbol.for("nodejs.util.inspect.custom")`).
+ * @returns {symbol} The symbol for custom inspect (`Symbol.for("nodejs.util.inspect.custom")`).
  * @version 1.0.0
  */
 const gci = function getCustomInspect() {
@@ -783,7 +783,7 @@ const gci = function getCustomInspect() {
 };
 /**
  * The `_Session` object.
- * @return {object} The `_Session` object.
+ * @returns {object} The `_Session` object.
  * @version 1.0.0
  */
 function _Session() {
@@ -793,17 +793,17 @@ function _Session() {
   let i = 0;
   /**
    * Checks if the `_Session` is **closed**.
-   * @return {Promise<boolean>}
+   * @returns {Promise<boolean>}
    */
   obj.closed = () => new Promise((r) => (closed[i] ? r(true) : undefined));
   /**
    * Checks if the `_Session` is **opened**.
-   * @return {Promise<boolean>}
+   * @returns {Promise<boolean>}
    */
   obj.opened = () => new Promise((r) => (open[i] ? r(true) : undefined));
   /**
    * Get the `_Session` info.
-   * @return {{object: {opened: Promise<boolean>, closed: Promise<boolean>}, map: Map<string, Promise<boolean>>}}
+   * @returns {{object: {opened: Promise<boolean>, closed: Promise<boolean>}, map: Map<string, Promise<boolean>>}}
    */
   obj.getInfo = () => ({
     object: { opened: obj.opened(), closed: obj.closed() },
@@ -814,7 +814,7 @@ function _Session() {
   const et = new EventTarget();
   /**
    * Closes the `_Session`.
-   * @return {boolean} Shows if the function is successful.
+   * @returns {boolean} Shows if the function is successful.
    */
   obj.close = () => {
     i = i + 1;
@@ -841,7 +841,7 @@ function _Session() {
   };
   /**
    * Opens the `_Session`.
-   * @return {boolean} Shows if the function is successful.
+   * @returns {boolean} Shows if the function is successful.
    */
   obj.open = () => {
     i = i + 1;
@@ -870,21 +870,21 @@ function _Session() {
    * Adds an event listener.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @return {void}
+   * @returns {void}
    */
   obj.on = (name, callback) => et.addEventListener(name, callback);
   /**
    * Removes an event listener.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @return {void}
+   * @returns {void}
    */
   obj.off = (name, callback) => et.removeEventListener(name, callback);
   /**
    * Adds an event listener once.
    * @param {string} name The name of the event.
    * @param {function} callback The callback function.
-   * @return {void}
+   * @returns {void}
    */
   obj.once = (name, callback) => {
     function handler(event) {
@@ -1102,7 +1102,7 @@ const main = {
       /**
        * @param {NodeJS.ErrnoException} err
        * @param {string} data
-       * @return {string[]}
+       * @returns {string[]}
        */
       (err, data) => {
         if (err) throw err;
