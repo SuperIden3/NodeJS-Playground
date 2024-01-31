@@ -583,8 +583,8 @@ Object.prototype.prettify = prettify;
 /**
  * *Mappify* or *Settify* an object.
  * Turns `obj` and everything inside of it into a `Map` or `Set`.
- * @return {Map | Set} The mappified/settified object.
- * @version 2.1.0
+ * @return {Map<(string | symbol | number), any> | Set<any>} The mappified/settified object.
+ * @version 2.1.1
  * @example
  * ```js
  * const obj = {
@@ -597,7 +597,7 @@ Object.prototype.prettify = prettify;
  *   },
  *   f: [5, 6],
  * };
- * console.log(obj.mappify()); // Map (4) { 'a' => 1, 'b' => 2, 'c' => Map (2) { 'd' => 3, 'e' => 4 }, 'f' => Set(2) { 5, 6 } }
+ * console.log(obj.mappify()); // Map(4) { 'a' => 1, 'b' => 2, 'c' => Map(2) { 'd' => 3, 'e' => 4 }, 'f' => Set(2) { 5, 6 } }
  * ```
  */
 function mappify() {
