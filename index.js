@@ -1030,6 +1030,52 @@ const cts = function createTransformStream(
     readableStrategy,
   );
 };
+/**
+ * Converts the argument passed in into an array of arrays, or entries.
+ * @param {any} thing The value to convert to an array of arrays.
+ * @param {boolean} all Decided if everything inside `thing` and `thing` itself should be converted into arrays of arrays.
+ * @returns {[[any, any]]} The array of arrays or entries from `thing`.
+ */
+function Entries(thing, all = false) {
+  let returnValue;
+  if ("entries" in thing) {
+    const arr = [];
+    for (const i of thing.entries()) {
+      arr.push(i);
+    }
+    returnValue = arr;
+  } else if (Array.isArray(thing)) {
+    for (const i of thing) {
+      if (!Array.isArray(i)) {
+        throw new Error("`Entries` only works with arrays of arrays.");
+      }
+    }
+    returnValue = thing;
+  } else {
+    returnValue = Object.entries(thing);
+  }
+  if (all) {
+    for (const i of returnValue) {
+      if (Array.isArray(i[1])) {
+        i[1] = Entries(i[1]);
+      }
+    }
+  }
+  returnValue.name = "Entries";
+  returnValue.constructor = Entries;
+  returnValue = new Proxy(returnValue, {
+    get(target, prop) {
+      if (prop === "name") {
+        return "Entries";
+      }
+      if (prop === "constructor") {
+        return Entries;
+      }
+      return target[prop];
+    },
+  });
+  return returnValue;
+}
 
 // @functions
 const customs = {
@@ -1073,6 +1119,7 @@ const customs = {
   crs,
   cws,
   cts,
+  Entries,
 };
 // ----------------------------------------------------------//
 /**
