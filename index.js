@@ -1036,7 +1036,7 @@ const cts = function createTransformStream(
  * @param {boolean} all Decided if everything inside `thing` and `thing` itself should be converted into arrays of arrays.
  * @returns {[[any, any]]} The array of arrays or entries from `thing`.
  */
-function Entries(thing, all = false) {
+function Entries(thing) {
   let returnValue;
   if ("entries" in thing) {
     const arr = [];
@@ -1054,13 +1054,6 @@ function Entries(thing, all = false) {
   } else {
     returnValue = Object.entries(thing);
   }
-  if (all) {
-    for (const i of returnValue) {
-      if (Array.isArray(i[1])) {
-        i[1] = Entries(i[1]);
-      }
-    }
-  }
   returnValue.name = "Entries";
   returnValue.constructor = Entries;
   returnValue = new Proxy(returnValue, {
@@ -1075,7 +1068,7 @@ function Entries(thing, all = false) {
     },
   });
   return returnValue;
-}
+};
 
 // @functions
 const customs = {
