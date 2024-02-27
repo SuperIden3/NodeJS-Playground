@@ -1032,11 +1032,13 @@ const cts = function createTransformStream(
 };
 /**
  * Converts the argument passed in into an array of arrays, or entries.
+ * @version 2.0.0
  * @param {any} thing The value to convert to an array of arrays.
  * @param {boolean} all Decided if everything inside `thing` and `thing` itself should be converted into arrays of arrays.
  * @returns {[[any, any]]} The array of arrays or entries from `thing`.
  */
 function Entries(thing) {
+  thing = thing || {};
   let returnValue;
   if ("entries" in thing) {
     const arr = [];
@@ -1051,24 +1053,87 @@ function Entries(thing) {
       }
     }
     returnValue = thing;
+  } else if ("next" in thing) {
+    const arr = [];
+    while (true) {
+      const val = thing.next();
+      if (val.done) break;
+      arr.push(val.value);
+    }
+    returnValue = arr;
   } else {
     returnValue = Object.entries(thing);
   }
-  returnValue.name = "Entries";
-  returnValue.constructor = Entries;
-  returnValue = new Proxy(returnValue, {
-    get(target, prop) {
-      if (prop === "name") {
-        return "Entries";
-      }
-      if (prop === "constructor") {
-        return Entries;
-      }
-      return target[prop];
+  function toObject() {
+    return Object.fromEntries(Array.from(returnValue));
+  }
+  Object.defineProperties(returnValue, {
+    name: {
+      value: "Entries",
+    },
+    constructor: {
+      value: Entries,
     },
   });
+  const _prototype = Array.prototype;
+  _prototype.toObj = toObject;
+  Object.setPrototypeOf(returnValue, _prototype);
   return returnValue;
+}
+/**
+ * Converts a string to an array buffer.
+ * @param {string} str The string to convert into an `ArrayBuffer`.
+ * @returns {ArrayBuffer} The corresponding `ArrayBuffer` of the string `str`.
+ */
+const toab = function toArrayBuffer(str) {
+  if (typeof str !== "string") {
+    throw new TypeError(
+      `The first argument must be a string, but it is a type of ${Array.isArray(str) ? "array" : typeof str} and its value is \`${str}\`.`,
+    );
+  }
+  let arrayType;
+  let maxCharCode = 0;
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str[i].codePointAt(0);
+    maxCharCode = Math.max(maxCharCode, charCode);
+  }
+  if (maxCharCode <= 255) {
+    arrayType = Uint8Array;
+  } else if (maxCharCode > 255 && maxCharCode <= 65535) {
+    arrayType = Uint16Array;
+  } else {
+    arrayType = Uint32Array;
+  }
+  const buffer = new arrayType(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str[i].codePointAt(0);
+    buffer[i] = charCode;
+  }
+  return new DataView(buffer.buffer).buffer;
 };
+/**
+ * Creates a `Warning` object.
+ *
+ * Meant for functions `console.warn` and `console.error`.
+ * @version 1.0.0
+ * @param {string} message The message to display.
+ * @param {{cause: Error | void, errors: any[] | void} = {}} options The options for the `Warning`.
+ */
+function Warning(message, options = { cause: null, errors: null }) {
+  options.cause = options.cause || {};
+  options.errors = options.errors || [];
+  const warning = [];
+  if (options.errors[0])
+    warning[0] = new AggregateError(options.errors, message, options);
+  else warning[0] = new Error(message, options);
+  Object.defineProperties(warning[0], {
+    name: {
+      value: "Warning",
+      writable: true,
+    },
+  });
+  return warning[0];
+}
 
 // @functions
 const customs = {
@@ -1113,6 +1178,8 @@ const customs = {
   cws,
   cts,
   Entries,
+  toab,
+  Warning,
 };
 // ----------------------------------------------------------//
 /**
@@ -1255,6 +1322,7 @@ async function Main() {
   });
   try {
     // @main
+    console.log();
   } catch (
     /**
      * The error that occurred.
