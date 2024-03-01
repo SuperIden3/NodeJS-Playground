@@ -5,7 +5,7 @@
   "main": "index.js",
   "type": "commonjs",
   "scripts": {
-    "start": "printf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --no-warnings index.js > output.log; else node --no-warnings index.js; fi",
+    "start": "#!/bin/bash\nprintf \"\\033[s\";read -p \"Write the output to \\`output.log\\`? [y/n] -> \" ans; printf \"\\033[u\"; printf \"\\033[2K\\r\"; if [ \"$ans\" = \"y\" ] || [ \"$ans\" = \"Y\" ]; then node --no-warnings index.js > output.log; else node --no-warnings index.js; fi",
     "paginate": "read -p \"Command: \" _cmd && $_cmd > out.txt && less out.txt && rm ./out.txt",
     "paginate2": "read -p \"Command: \" _cmd && $_cmd | less",
     "paginate3": "less -f -N $1",
@@ -14,7 +14,8 @@
     "update2": "tsc --build | less; yarn install | less && sudo apt-get update | less && npm i | less",
     "apkg": "read -p \"Yarn, NPM (default), Sudo, or DPKG? [y/n/s/d] \" answer && if [ ! \"$answer\" = \"d\" ] && [ ! \"$answer\" = \"D\" ]; then read -p \"Name of package: \" package; fi && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn add $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt-get install $package; elif [ \"$answer\" = \"d\" ] || [ \"$answer\" = \"D\" ]; then dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; else npm i $package; fi && echo Done!",
     "rmpkg": "read -p \"Yarn, NPM (default), or Sudo? [y/n/s] \" answer && read -p \"Name of package: \" package && if [ \"$answer\" = \"y\" ] || [ \"$answer\" = \"Y\" ]; then yarn remove $package; elif [ \"$answer\" = \"s\" ] || [ \"$answer\" = \"S\" ]; then sudo apt remove $package; else npm uninstall $package; fi && echo Done!",
-    "packup": "npm pack --pack-destination packnpm/; dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; echo Done!"
+    "packup": "npm pack --pack-destination packnpm/; dpkg-deb --build ./dpkg-deb/nodejs-playground ./dpkg-deb; echo Done!",
+    "docker": "docker build -t playground-nodejs .; docker run -it playground-nodejs; echo Done!"
   },
   "contributors": [
     "Chi Zu"

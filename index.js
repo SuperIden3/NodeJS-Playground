@@ -1032,10 +1032,9 @@ const cts = function createTransformStream(
 };
 /**
  * Converts the argument passed in into an array of arrays, or entries.
- * @version 2.0.0
- * @param {any} thing The value to convert to an array of arrays.
- * @param {boolean} all Decided if everything inside `thing` and `thing` itself should be converted into arrays of arrays.
- * @returns {[[any, any]]} The array of arrays or entries from `thing`.
+ * @version 2.0.1
+ * @param {object | any} thing The value to convert to an array of arrays.
+ * @returns {Array<[any, any]>} The array of arrays or entries from `thing`.
  */
 function Entries(thing) {
   thing = thing || {};
@@ -1134,6 +1133,37 @@ function Warning(message, options = { cause: null, errors: null }) {
   });
   return warning[0];
 }
+const ng = function* numberGenerator(minimum = 0, maximum = 1) {
+  if (typeof minimum !== "number" || typeof maximum !== "number")
+    throw new TypeError("Both `minimum` and `maximum` must be numbers.", {
+      cause: (() => {
+        const returnValue = Object(
+          minimum !== "number" || maximum !== "number",
+        );
+        returnValue.minimum = minimum;
+        returnValue.maximum = maximum;
+        return returnValue;
+      })(),
+    });
+  if (minimum > maximum)
+    throw new RangeError("`minimum` must be less than or equal to `maximum`.", {
+      cause: (() => {
+        const returnValue = Object(minimum > maximum);
+        returnValue.minimum = minimum;
+        returnValue.maximum = maximum;
+        return returnValue;
+      })(),
+    });
+  do {
+    const range = maximum - minimum;
+    const num = Math.random() * range + minimum;
+    yield num;
+  } while (
+    typeof minimum === "number" &&
+    typeof maximum === "number" &&
+    minimum < maximum
+  );
+};
 
 // @functions
 const customs = {
@@ -1180,6 +1210,7 @@ const customs = {
   Entries,
   toab,
   Warning,
+  numberGenerator: ng,
 };
 // ----------------------------------------------------------//
 /**
@@ -1322,7 +1353,43 @@ async function Main() {
   });
   try {
     // @main
-    console.log();
+    const p = Promise.resolve(new _URL.URL(`https://perchance.org/`));
+    console.debug("Promise:", p);
+    p.then(async (v) => {
+      const obj = {
+        actual: v,
+        origin: v.origin,
+        protocol: v.protocol,
+        username: v.username,
+        password: v.password,
+        host: v.host,
+        hostname: v.hostname,
+        port: v.port,
+        pathname: v.pathname,
+        search: v.search,
+        searchParams: /*(() => {
+          const object = new (class URLSearchParams extends Map {
+            constructor(stuff) {
+              super(stuff);
+              return this;
+            }
+            [Symbol.toStringTag] = "URLSearchParams";
+          })(Entries(v.searchParams));
+          return object;
+        })()*/ {
+          ...Entries(v.searchParams),
+          [Symbol.toStringTag]: "URLSearchParams",
+        },
+        hash: v.hash,
+        href: v.href,
+        [Symbol.toStringTag]: "URL",
+        toString: (opts = { custom: false }) =>
+          opts.custom ? JSON.stringify(obj) : v.toString(),
+      };
+      console.log(obj);
+    }).catch((err) => {
+      throw new Error("Seems like an error occurred.", { cause: err });
+    });
   } catch (
     /**
      * The error that occurred.
@@ -1332,7 +1399,7 @@ async function Main() {
      */
     e
   ) {
-    console.error(e);
+    console.error(new Error("Seems like an error occurred.", { cause: e }));
     console.error(
       new Event("error", {
         error: e,
