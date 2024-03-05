@@ -1353,43 +1353,24 @@ async function Main() {
   });
   try {
     // @main
-    const p = Promise.resolve(new _URL.URL(`https://perchance.org/`));
-    console.debug("Promise:", p);
-    p.then(async (v) => {
-      const obj = {
-        actual: v,
-        origin: v.origin,
-        protocol: v.protocol,
-        username: v.username,
-        password: v.password,
-        host: v.host,
-        hostname: v.hostname,
-        port: v.port,
-        pathname: v.pathname,
-        search: v.search,
-        searchParams: /*(() => {
-          const object = new (class URLSearchParams extends Map {
-            constructor(stuff) {
-              super(stuff);
-              return this;
-            }
-            [Symbol.toStringTag] = "URLSearchParams";
-          })(Entries(v.searchParams));
-          return object;
-        })()*/ {
-          ...Entries(v.searchParams),
-          [Symbol.toStringTag]: "URLSearchParams",
-        },
-        hash: v.hash,
-        href: v.href,
-        [Symbol.toStringTag]: "URL",
-        toString: (opts = { custom: false }) =>
-          opts.custom ? JSON.stringify(obj) : v.toString(),
-      };
-      console.log(obj);
-    }).catch((err) => {
-      throw new Error("Seems like an error occurred.", { cause: err });
+    const mystream = new STREAM.Transform({
+      transform(chunk, encoding, callback) {
+        const ch = Number(chunk);
+        this.push(
+          JSON.stringify({
+            input: ch,
+            output: ch + ch * 3.14159265358979232653505,
+            condition: `${ch} + (${ch} ${String.fromCharCode(215)} 3.14159265358979232653505)`,
+          }),
+        );
+        callback();
+      },
     });
+    mystream.on("data", (data) => {
+      console.log("Read Data:", new Map(Entries(JSON.parse(data.toString()))));
+    });
+    for (let i = -5; i <= 5; i = i + 0.5) mystream.write(String(i));
+    mystream.end();
   } catch (
     /**
      * The error that occurred.
