@@ -19,6 +19,9 @@ const DOTENV = require("dotenv");
 DOTENV.config();
 const CRYPTO = require("crypto");
 const _JSDOM = require("jsdom");
+const _PROMISE = require("promise");
+const __PROMISE = require("promises");
+const ___PROMISE = require("bluebird");
 /* const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -39,6 +42,9 @@ const imports = {
   crypto: CRYPTO,
   readline: require("readline"),
   jsdom: _JSDOM,
+  promise: _PROMISE,
+  promises: __PROMISE,
+  bluebird: ___PROMISE,
 };
 // ------------------------------------------------------------//
 /**
@@ -316,6 +322,12 @@ const esc = function executeShellCommand(command) {
     } catch (e) {
       f(e);
     }
+  }).then((o) => {
+    if (o.error || o.stderr)
+      throw {
+        error: new Error("Error:", { cause: Object(o.error) }),
+        stderr: new Error("STDERR:", { cause: Object(o.stderr) }),
+      };
   });
 };
 const convertTo = {
@@ -1133,6 +1145,15 @@ function Warning(message, options = { cause: null, errors: null }) {
   });
   return warning[0];
 }
+/**
+ * Generates a number between `minimum` and `maximum`.
+ * @version 1.1.0
+ * @param {number} minimum The minimum number for the generated number.
+ * @param {number} maximum The maximum number for the generated number.
+ * @throws {RangeError} If `minimum` is greater than `maximum`.
+ * @throws {TypeError} If `minimum` or `maximum` is not a number.
+ * @returns {Generator<number, never, void>}
+ */
 const ng = function* numberGenerator(minimum = 0, maximum = 1) {
   if (typeof minimum !== "number" || typeof maximum !== "number")
     throw new TypeError("Both `minimum` and `maximum` must be numbers.", {
@@ -1156,7 +1177,8 @@ const ng = function* numberGenerator(minimum = 0, maximum = 1) {
     });
   do {
     const range = maximum - minimum;
-    const num = Math.random() * range + minimum;
+    let num = Math.random() * range;
+    while (num < minimum) num = Math.random() * range;
     yield num;
   } while (
     typeof minimum === "number" &&
@@ -1351,6 +1373,7 @@ async function Main() {
     imports,
     customs,
   });
+
   try {
     // @main
     const mystream = new STREAM.Transform({
@@ -1361,7 +1384,7 @@ async function Main() {
             input: ch,
             output: ch + ch * 3.14159265358979232653505,
             condition: `${ch} + (${ch} ${String.fromCharCode(215)} 3.14159265358979232653505)`,
-          }),
+          }) + "\n\r",
         );
         callback();
       },
@@ -1369,7 +1392,9 @@ async function Main() {
     mystream.on("data", (data) => {
       console.log("Read Data:", new Map(Entries(JSON.parse(data.toString()))));
     });
-    for (let i = -5; i <= 5; i = i + 0.5) mystream.write(String(i));
+    for (let i = -5; i <= 5; i = i + 0.5) {
+      mystream.write(String(i * Math.random()));
+    }
     mystream.end();
   } catch (
     /**
