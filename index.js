@@ -1044,18 +1044,17 @@ const cts = function createTransformStream(
 };
 /**
  * Converts the argument passed in into an array of arrays, or entries.
- * @version 2.0.1
+ * @version 2.1.0
  * @param {object | any} thing The value to convert to an array of arrays.
- * @returns {Array<[any, any]>} The array of arrays or entries from `thing`.
+ * @returns {[any, any][]} The array of arrays or entries from `thing`.
  */
 function Entries(thing) {
   thing = thing || {};
   let returnValue;
-  if ("entries" in thing) {
+  if ("entries" in thing || "next" in thing) {
     const arr = [];
-    for (const i of thing.entries()) {
-      arr.push(i);
-    }
+    if (thing.entries) for (const i of thing.entries()) arr.push(i);
+    else for (const i of thing) arr.push(i);
     returnValue = arr;
   } else if (Array.isArray(thing)) {
     for (const i of thing) {
@@ -1085,12 +1084,62 @@ function Entries(thing) {
     constructor: {
       value: Entries,
     },
+    [Symbol.toStringTag]: {
+      value: "Entries",
+    },
   });
   const _prototype = Array.prototype;
   _prototype.toObj = toObject;
   Object.setPrototypeOf(returnValue, _prototype);
   return returnValue;
 }
+/**
+ * Asynchronous version of `Entries`.
+ * @version 1.0.0
+ * @param {object | any} thing The value to convert to an array of arrays.
+ * @returns {Promise<[any, any][]>}
+ */
+Entries.async = async function AsyncEntries(thing) {
+  let returnValue;
+  if ("entries" in thing || "next" in thing) {
+    const arr = [];
+    if (thing.entries) for await (const i of thing.entries()) arr.push(await i);
+    else for await (const i of thing) arr.push(await i);
+    returnValue = arr;
+  } else if (Array.isArray(thing)) {
+    for (const i of thing) {
+      if (!Array.isArray(await i)) {
+        throw new Error("`Entries` only works with arrays of arrays.");
+      }
+    }
+    returnValue = thing;
+  } else {
+    returnValue = Object.entries(thing);
+  }
+  Object.defineProperties(returnValue, {
+    name: {
+      value: "AsyncEntries",
+    },
+    constructor: {
+      value: Entries.async,
+    },
+    [Symbol.toStringTag]: {
+      value: "AsyncEntries",
+    },
+  });
+  returnValue = new Proxy(returnValue, {
+    get(target, prop) {
+      if (prop === "name") {
+        return "AsyncEntries";
+      }
+      if (prop === "constructor") {
+        return Entries.async;
+      }
+      return target[prop];
+    },
+  });
+  return returnValue;
+};
 /**
  * Converts a string to an array buffer.
  * @param {string} str The string to convert into an `ArrayBuffer`.
@@ -1185,6 +1234,29 @@ const ng = function* numberGenerator(minimum = 0, maximum = 1) {
     typeof maximum === "number" &&
     minimum < maximum
   );
+};
+/**
+ * Generates the character codes of a string.
+ * @version 1.0.0
+ * @param {string} str The string to get the character codes of.
+ * @returns {Generator<Promise<number>, Promise<number[]>, void>}
+ */
+const gccs = async function* getCharCodes(str, debug = false) {
+  const codes = [];
+  for (const char of str) {
+    for (let i = 0; i <= 0x10ffff; i++) {
+      if (char === String.fromCharCode(i)) {
+        if (debug)
+          console.log(
+            `\x1b[1m${char}\x1b[0m's character code is \x1b[36m${i}\x1b[0m.`,
+          );
+        yield i;
+        codes.push(i);
+        break;
+      }
+    }
+  }
+  return codes;
 };
 
 // @functions
@@ -1376,26 +1448,15 @@ async function Main() {
 
   try {
     // @main
-    const mystream = new STREAM.Transform({
-      transform(chunk, encoding, callback) {
-        const ch = Number(chunk);
-        this.push(
-          JSON.stringify({
-            input: ch,
-            output: ch + ch * 3.14159265358979232653505,
-            condition: `${ch} + (${ch} ${String.fromCharCode(215)} 3.14159265358979232653505)`,
-          }) + "\n\r",
-        );
-        callback();
-      },
-    });
-    mystream.on("data", (data) => {
-      console.log("Read Data:", new Map(Entries(JSON.parse(data.toString()))));
-    });
-    for (let i = -5; i <= 5; i = i + 0.5) {
-      mystream.write(String(i * Math.random()));
-    }
-    mystream.end();
+    const a = gccs("Hello World!");
+    a.next()
+      .then(console.log)
+      .catch((e) =>
+        console.error(new Error("An error occurred.", { cause: e })),
+      );
+    Entries.async(a)
+      .then(console.log)
+      .catch((e) => console.log(new Error("An error occurred.", { cause: e })));
   } catch (
     /**
      * The error that occurred.
