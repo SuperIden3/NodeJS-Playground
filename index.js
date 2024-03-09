@@ -1237,9 +1237,9 @@ const ng = function* numberGenerator(minimum = 0, maximum = 1) {
 };
 /**
  * Generates the character codes of a string.
- * @version 1.0.0
+ * @version 1.0.1
  * @param {string} str The string to get the character codes of.
- * @returns {Generator<Promise<number>, Promise<number[]>, void>}
+ * @returns {AsyncGenerator<number, number[], void>}
  */
 const gccs = async function* getCharCodes(str, debug = false) {
   const codes = [];
@@ -1289,7 +1289,7 @@ const customs = {
   Float,
   Double,
   gci,
-  _Session,
+  Session: _Session,
   Octal,
   Hex,
   engroup,
@@ -1304,7 +1304,8 @@ const customs = {
   Entries,
   toab,
   Warning,
-  numberGenerator: ng,
+  ng,
+  gccs,
 };
 // ----------------------------------------------------------//
 /**
