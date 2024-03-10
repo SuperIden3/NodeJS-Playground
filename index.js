@@ -1044,7 +1044,11 @@ const cts = function createTransformStream(
 };
 /**
  * Converts the argument passed in into an array of arrays, or entries.
+ * @function
+ * @name Entries
  * @version 2.1.0
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
+ * @summary Converts the argument passed in into or validates to an array of arrays, or entries. It supports an asynchronous version (`Entries.async` named as `AsyncEntries`).
  * @param {object | any} thing The value to convert to an array of arrays.
  * @returns {[any, any][]} The array of arrays or entries from `thing`.
  */
@@ -1095,7 +1099,11 @@ function Entries(thing) {
 }
 /**
  * Asynchronous version of `Entries`.
+ * @function
+ * @name AsyncEntries
  * @version 1.0.0
+ * @async Accepts the same arguments as `Entries`, but can also accept async iterators
+ * @see https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/entries
  * @param {object | any} thing The value to convert to an array of arrays.
  * @returns {Promise<[any, any][]>}
  */
@@ -1116,6 +1124,9 @@ Entries.async = async function AsyncEntries(thing) {
   } else {
     returnValue = Object.entries(thing);
   }
+  function toObject() {
+    return Object.fromEntries(Array.from(returnValue));
+  }
   Object.defineProperties(returnValue, {
     name: {
       value: "AsyncEntries",
@@ -1127,25 +1138,22 @@ Entries.async = async function AsyncEntries(thing) {
       value: "AsyncEntries",
     },
   });
-  returnValue = new Proxy(returnValue, {
-    get(target, prop) {
-      if (prop === "name") {
-        return "AsyncEntries";
-      }
-      if (prop === "constructor") {
-        return Entries.async;
-      }
-      return target[prop];
-    },
-  });
+  const _prototype = Array.prototype;
+  _prototype.toObj = toObject;
+  Object.setPrototypeOf(returnValue, _prototype);
   return returnValue;
 };
 /**
  * Converts a string to an array buffer.
+ * @version 1.1.0
  * @param {string} str The string to convert into an `ArrayBuffer`.
- * @returns {ArrayBuffer} The corresponding `ArrayBuffer` of the string `str`.
+ * @param {{returnTypedArray: boolean = false}} options The options to use.
+ * @returns {{unicodes: ArrayBuffer, codes: ArrayBuffer} | {unicodes: Uint8Array | Uint16Array | Uint32Array, codes: Uint16Array}} The corresponding `ArrayBuffer` of the string `str`.
  */
-const toab = function toArrayBuffer(str) {
+const toab = function toArrayBuffer(
+  str,
+  options = { returnTypedArray: false },
+) {
   if (typeof str !== "string") {
     throw new TypeError(
       `The first argument must be a string, but it is a type of ${Array.isArray(str) ? "array" : typeof str} and its value is \`${str}\`.`,
@@ -1157,19 +1165,30 @@ const toab = function toArrayBuffer(str) {
     const charCode = str[i].codePointAt(0);
     maxCharCode = Math.max(maxCharCode, charCode);
   }
-  if (maxCharCode <= 255) {
-    arrayType = Uint8Array;
-  } else if (maxCharCode > 255 && maxCharCode <= 65535) {
-    arrayType = Uint16Array;
-  } else {
+  if (maxCharCode <= 255) arrayType = Uint8Array;
+  else if (maxCharCode > 255 && maxCharCode <= 65535) arrayType = Uint16Array;
+  else if (maxCharCode > 65535 && maxCharCode <= 4294967295)
     arrayType = Uint32Array;
-  }
+  else arrayType = BigUint64Array;
   const buffer = new arrayType(str.length);
   for (let i = 0; i < str.length; i++) {
     const charCode = str[i].codePointAt(0);
     buffer[i] = charCode;
   }
-  return new DataView(buffer.buffer).buffer;
+  const buffer2 = new Uint16Array(str.length);
+  for (let i = 0; i < str.length; i++) {
+    const charCode = str[i].charCodeAt(0);
+    buffer2[i] = charCode;
+  }
+  if (options.returnTypedArray)
+    return {
+      unicodes: buffer,
+      codes: buffer2,
+    };
+  return {
+    unicodes: buffer.buffer,
+    codes: buffer2.buffer,
+  };
 };
 /**
  * Creates a `Warning` object.
@@ -1237,20 +1256,23 @@ const ng = function* numberGenerator(minimum = 0, maximum = 1) {
 };
 /**
  * Generates the character codes of a string.
- * @version 1.0.1
+ * @version 1.0.2
  * @param {string} str The string to get the character codes of.
+ * @param {{debug: boolean} = {debug: false}} options The options for the generator.
  * @returns {AsyncGenerator<number, number[], void>}
  */
-const gccs = async function* getCharCodes(str, debug = false) {
+const gccs = async function* getCharCodes(str, options = { debug: false }) {
+  const debug = options.debug || false;
   const codes = [];
   for (const char of str) {
     for (let i = 0; i <= 0x10ffff; i++) {
       if (char === String.fromCharCode(i)) {
         if (debug)
-          console.log(
-            `\x1b[1m${char}\x1b[0m's character code is \x1b[36m${i}\x1b[0m.`,
-          );
-        yield i;
+          yield {
+            message: `\x1b[1m${char}\x1b[0m's character code is \x1b[36m${i}\x1b[0m.`,
+            i,
+          };
+        else yield i;
         codes.push(i);
         break;
       }
