@@ -302,32 +302,29 @@ function factorial(n) {
 /**
  * Execute a shell command.
  * @param {string} command The shell command to execute.
- * @returns {Promise<{error: ?Error, stdout: string, stderr: string}>} The result of the execution.
+ * @param {{debug: boolean = false }} options The options for the command.
+ * @returns {Promise<string>} The result of the execution.
  */
-const esc = function executeShellCommand(command) {
+const esc = function executeShellCommand(command, options = { debug: false }) {
+  const debug = options.debug || false;
   const cp = require("child_process");
+  if (debug)
+    console.debug(`> ${main.colors.Cyan}${command}${main.colors.Reset}`);
   return new Promise((r, f) => {
     try {
       cp.exec(command, (err, stdout, stderr) => {
-        r({
-          error: (() => {
-            if (err instanceof Error) return new Error(err.message);
-            if (err !== null) return new Error(err);
-            return err;
-          })(),
-          stdout,
-          stderr,
-        });
+        if (debug) console.debug({ err, stdout, stderr });
+        if (err || stderr)
+          if (err.name.includes("Error"))
+            f(new Error(err.message, { cause: { error: err, stderr } }));
+          else if (err !== null)
+            f(new Error(err, { cause: { error: err, stderr } }));
+          else f({ error: err, stderr });
+        else r(stdout);
       });
     } catch (e) {
       f(e);
     }
-  }).then((o) => {
-    if (o.error || o.stderr)
-      throw {
-        error: new Error("Error:", { cause: Object(o.error) }),
-        stderr: new Error("STDERR:", { cause: Object(o.stderr) }),
-      };
   });
 };
 const convertTo = {
