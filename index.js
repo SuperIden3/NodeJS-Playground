@@ -20,8 +20,10 @@ DOTENV.config();
 const CRYPTO = require("crypto");
 const _JSDOM = require("jsdom");
 const _PROMISE = require("promise");
+Promise.Promise = _PROMISE;
 const __PROMISE = require("promises");
 const ___PROMISE = require("bluebird");
+Promise.BlueBird = ___PROMISE;
 /* const rl = require("readline").createInterface({
   input: process.stdin,
   output: process.stdout,
@@ -1179,11 +1181,11 @@ const toab = function toArrayBuffer(
   }
   if (options.returnTypedArray)
     return {
-      unicodes: buffer,
+      points: buffer,
       codes: buffer2,
     };
   return {
-    unicodes: buffer.buffer,
+    points: buffer.buffer,
     codes: buffer2.buffer,
   };
 };
