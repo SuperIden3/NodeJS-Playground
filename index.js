@@ -24,7 +24,8 @@ Promise.Promise = _PROMISE;
 const __PROMISE = require("promises");
 const ___PROMISE = require("bluebird");
 Promise.BlueBird = ___PROMISE;
-/* const rl = require("readline").createInterface({
+const ICONV = require("iconv-lite");
+/* const readline = require("readline"), rl = readline.createInterface({
   input: process.stdin,
   output: process.stdout,
 });*/
@@ -47,6 +48,8 @@ const imports = {
   promise: _PROMISE,
   promises: __PROMISE,
   bluebird: ___PROMISE,
+  "iconv-lite": ICONV,
+  // readline,
 };
 // ------------------------------------------------------------//
 /**
@@ -1146,14 +1149,22 @@ Entries.async = async function AsyncEntries(thing) {
  * Converts a string to an array buffer.
  * @version 1.1.0
  * @param {string} str The string to convert into an `ArrayBuffer`.
- * @param {{returnTypedArray: boolean = false}} options The options to use.
+ * @param {{returnTypedArray: boolean = false, debug: boolean = false, encoding: string = "UTF-8"}} options The options to use.
  * @returns {{unicodes: ArrayBuffer, codes: ArrayBuffer} | {unicodes: Uint8Array | Uint16Array | Uint32Array, codes: Uint16Array}} The corresponding `ArrayBuffer` of the string `str`.
  */
 const toab = function toArrayBuffer(
   str,
-  options = { returnTypedArray: false },
+  options = { returnTypedArray: false, debug: false, encoding: "UTF-8" },
 ) {
+  const returnTypedArray = options.returnTypedArray || false;
+  const debug = options.debug || false;
+  const encoding = options.encoding || "UTF-8";
+  const encoded = ICONV.encode(str, encoding);
+  if (debug)
+    console.debug(`The \x1b[31mencoding\x1b[0m is \x1b[32m${encoding}\x1b[0m.`);
   if (typeof str !== "string") {
+    if (debug)
+      console.debug(`The first argument was \x1b[3mnot\x1b[0m a string.`);
     throw new TypeError(
       `The first argument must be a string, but it is a type of ${Array.isArray(str) ? "array" : typeof str} and its value is \`${str}\`.`,
     );
@@ -1164,29 +1175,37 @@ const toab = function toArrayBuffer(
     const charCode = str[i].codePointAt(0);
     maxCharCode = Math.max(maxCharCode, charCode);
   }
+  if (debug)
+    console.debug(
+      `The \x1b[1mmaximum value\x1b[0m amongst the character codes in the string is \x1b[33m${maxCharCode}\x1b[0m.`,
+    );
   if (maxCharCode <= 255) arrayType = Uint8Array;
   else if (maxCharCode > 255 && maxCharCode <= 65535) arrayType = Uint16Array;
   else if (maxCharCode > 65535 && maxCharCode <= 4294967295)
     arrayType = Uint32Array;
   else arrayType = BigUint64Array;
+  if (debug)
+    console.debug(
+      `The \x1b[1marray type\x1b[0m being used is a \x1b[35m${arrayType.name}\x1b[0m.`,
+    );
   const buffer = new arrayType(str.length);
+  const buffer2 = new arrayType(str.length);
   for (let i = 0; i < str.length; i++) {
-    const charCode = str[i].codePointAt(0);
-    buffer[i] = charCode;
-  }
-  const buffer2 = new Uint16Array(str.length);
-  for (let i = 0; i < str.length; i++) {
+    const codePoint = str[i].codePointAt(0);
+    buffer[i] = codePoint;
     const charCode = str[i].charCodeAt(0);
     buffer2[i] = charCode;
+    if (debug)
+      console.debug(
+        `The character code for \x1b[31m${str[i]}\x1b[0m is \x1b[33m${charCode}\x1b[0m. The code point is \x1b[33m${codePoint}\x1b[0m.`,
+      );
   }
-  if (options.returnTypedArray)
-    return {
-      points: buffer,
-      codes: buffer2,
-    };
+  if (returnTypedArray)
+    return { unicodes: buffer, codes: buffer2, iconv: encoded };
   return {
-    points: buffer.buffer,
+    unicodes: buffer.buffer,
     codes: buffer2.buffer,
+    iconv: encoded.buffer,
   };
 };
 /**
